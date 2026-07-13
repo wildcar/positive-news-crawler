@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-13 · Initial production source list
+- What: Added 19 verified sources (8 RU + 11 EN positive-news sites, RSS endpoints checked for HTTP 200, feed validity, freshness, robots.txt) to the production database and repaired the RIA source (removed 404 sitemap endpoint, added `ria\.ru/\d{8}/` include pattern).
+- Why: The deployed crawler had an empty working source list; candidates came from `~/repo/hermes/positive-news/registry.md` usage counts and a web search for dedicated positive-news outlets.
+- Files: production SQLite only (no code changes); rejected candidates recorded in `AGENTS/STATE.md`.
+- Next: Watch first crawl runs and positive-yield statistics; tune per-site rules and probation/pauses as feedback arrives.
+
 ## 2026-07-13 · Nginx HTTPS reverse-proxy support
 - What: Added the Nginx site, loopback-only forwarded-scheme trust in Waitress/Django, deployment procedure, and regression assertions for `newscrawler.wildcar.org`.
 - Why: Publish the operator UI through HTTPS while keeping Waitress bound only to loopback.
