@@ -60,7 +60,7 @@ sudo setfacl -m g:newscrawler:rwx,m:rwx,d:g:newscrawler:rwx,d:m:rwx \
   /var/log/newscrawler
 ```
 
-Режим `2770` сохраняет группу `newscrawler` у новых файлов. Default ACL даёт группе запись в создаваемые SQLite-файлы `-wal`, `-shm` и worker lock. systemd units дополнительно используют `UMask=0007`.
+Режим `2770` сохраняет группу `newscrawler` у новых файлов, а default ACL поддерживает групповой доступ к каталогу. SQLite создаёт основную базу с исходным режимом `0644`, поэтому после миграции ей отдельно назначается `0660`. WAL/SHM создаются на основе режима основной базы; systemd units дополнительно используют `UMask=0007` и перед стартом нормализуют режим базы.
 
 Проверьте настройки:
 
@@ -156,6 +156,8 @@ sudo -u newscrawler /bin/bash -c '
   .venv/bin/python manage.py collectstatic --noinput
   .venv/bin/python manage.py check
 '
+sudo chown newscrawler:newscrawler /var/lib/newscrawler/newscrawler.sqlite3
+sudo chmod 0660 /var/lib/newscrawler/newscrawler.sqlite3
 sudo chown -R root:root /opt/newscrawler/staticfiles
 sudo find /opt/newscrawler/staticfiles -type d -exec chmod 0755 {} +
 sudo find /opt/newscrawler/staticfiles -type f -exec chmod 0644 {} +

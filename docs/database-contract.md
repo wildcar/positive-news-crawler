@@ -4,7 +4,7 @@
 
 ## Доступ к production-базе на Ubuntu
 
-Production-файл находится в `/var/lib/newscrawler/newscrawler.sqlite3`. Каждый прямой клиент должен работать на том же хосте под отдельным системным пользователем из группы `newscrawler`. Каталог имеет setgid/default ACL, а процессы должны использовать `umask 0007`, чтобы SQLite sidecar-файлы `-wal` и `-shm` оставались доступны группе.
+Production-файл находится в `/var/lib/newscrawler/newscrawler.sqlite3` и должен иметь режим `0660` с группой `newscrawler`. Каждый прямой клиент должен работать на том же хосте под отдельным системным пользователем из этой группы. Каталог имеет setgid/default ACL, а процессы используют `umask 0007`, чтобы SQLite sidecar-файлы `-wal` и `-shm` оставались доступны группе.
 
 SQLite не поддерживает табличные роли: член группы с правом записи технически может изменить любую таблицу. Прикладной контракт разрешает клиентам читать `exchange_news_for_selection` и `exchange_latest_reviews`, а решения добавлять только в `exchange_review_events`.
 

@@ -2,6 +2,7 @@
 Description=Positive News Crawler web UI
 After=network.target
 ConditionPathExists=/etc/newscrawler/newscrawler.env
+ConditionPathExists=/var/lib/newscrawler/newscrawler.sqlite3
 ConditionPathIsDirectory=/var/lib/newscrawler
 
 [Service]
@@ -12,6 +13,7 @@ WorkingDirectory=/opt/newscrawler
 EnvironmentFile=/etc/newscrawler/newscrawler.env
 Environment=PYTHONDONTWRITEBYTECODE=1
 UMask=0007
+ExecStartPre=/usr/bin/chmod 0660 /var/lib/newscrawler/newscrawler.sqlite3
 ExecStart=/opt/newscrawler/.venv/bin/python -m waitress --listen=127.0.0.1:8000 newscrawler.wsgi:application
 Restart=always
 RestartSec=5

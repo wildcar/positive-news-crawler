@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-13 · Shared SQLite mode normalization
+- What: Added explicit `0660` initialization and systemd pre-start normalization for the production SQLite database.
+- Why: SQLite creates a new database with default `0644` permissions, which became `0640` and blocked other group members from writing.
+- Files: `deploy/systemd/`, `docs/ubuntu-deployment.md`, `docs/database-contract.md`, `AGENTS/*`
+- Next: Apply `chmod 0660` on the target database and continue deployment verification.
+
 ## 2026-07-13 · Ubuntu 24.04 and Python 3.12 support
 - What: Extended the supported Python range to 3.12, added it to the CI matrix, and retargeted the Ubuntu guide to the stock 24.04 runtime.
 - Why: Deploy cleanly on the destination Ubuntu 24.04 LTS host without third-party Python packages.

@@ -42,7 +42,7 @@ External selector <- exchange views -> append-only review events-+
 
 - ✅ Configure WAL, foreign keys, 30-second busy timeout, and normal synchronization on Django connections.
 - ✅ Allow one worker via OS file lock; lease due sources and recover expired leases.
-- ✅ On Ubuntu, store production SQLite state in `/var/lib/newscrawler`, shared by the local `newscrawler` group through a setgid directory, default ACLs, and `umask 0007`; every database client must run on the same host and belong to that group.
+- ✅ On Ubuntu, store production SQLite state in `/var/lib/newscrawler`, shared by the local `newscrawler` group through a setgid directory, default ACLs, an explicit `0660` database mode, and `umask 0007`; every database client must run on the same host and belong to that group.
 - ✅ Group exact normalized-body SHA-256 duplicates.
 - ✅ Group near duplicates of the same language within 48 hours using SimHash and title similarity; translations remain separate.
 - ✅ Retain every occurrence/source URL while exposing one logical item to the selector.
