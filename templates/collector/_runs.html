@@ -1,0 +1,2 @@
+<table><tr><th>Время</th><th>Источник</th><th>Статус</th><th>Получено / сохранено / отклонено / ошибок</th></tr>{% for run in runs %}<tr><td>{{ run.started_at }}</td><td><a href="{% url 'source_detail' run.source.pk %}">{{ run.source.name }}</a></td><td>{{ run.get_status_display }}</td><td>{{ run.fetched_count }} / {{ run.saved_count }} / {{ run.rejected_count }} / {{ run.error_count }}</td></tr>{% empty %}<tr><td colspan="4">Запусков нет</td></tr>{% endfor %}</table>
+

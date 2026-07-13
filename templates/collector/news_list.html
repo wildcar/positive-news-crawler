@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block content %}<h1>Новости</h1><p><a href="?">Все</a> · <a href="?decision=unreviewed">Без оценки</a> · <a href="?decision=positive">Позитивные</a></p><table><tr><th>Дата</th><th>Заголовок</th><th>Язык</th><th>Источников</th></tr>{% for item in items %}<tr><td>{{ item.published_at|default:item.first_seen_at }}</td><td><a href="{% url 'news_detail' item.pk %}">{{ item.title }}</a></td><td>{{ item.language|default:"—" }}</td><td>{{ item.source_count }}</td></tr>{% empty %}<tr><td colspan="4">Новостей нет</td></tr>{% endfor %}</table>{% endblock %}
+

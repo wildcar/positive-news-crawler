@@ -1,0 +1,20 @@
+[Unit]
+Description=Positive News Aggregator crawler worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=newsagg
+Group=newsagg
+WorkingDirectory=/opt/newsagg
+EnvironmentFile=/opt/newsagg/.env
+ExecStart=/opt/newsagg/.venv/bin/python manage.py runworker
+Restart=always
+RestartSec=10
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+
