@@ -100,7 +100,7 @@ deploy/systemd/  Ubuntu service units
 
 - ✅ MVP implemented, migrated, and verified on Windows/Python 3.14.5.
 - ✅ Sixteen deterministic tests pass; SQLite integrity and exchange objects are verified; CI covers Python 3.12, 3.13, and 3.14 on Ubuntu and Windows.
-- ✅ Initial production source list (21 sources: RIA good-news section plus 20 verified RU/EN sources) loaded on the destination host on 2026-07-13.
+- ✅ Initial production source list (20 sources: RIA good-news section plus 19 verified RU/EN sources) loaded on the destination host on 2026-07-13.
 - ⏳ Configure real operator credentials on the destination host.
 
 See `AGENTS/STATE.md` for the live snapshot.
