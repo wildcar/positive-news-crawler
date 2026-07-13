@@ -22,6 +22,14 @@ def ensure_runtime(source):
     return state
 
 
+def published_today(value) -> bool:
+    if value is None:
+        return False
+    if timezone.is_naive(value):
+        value = timezone.make_aware(value)
+    return timezone.localdate(value) == timezone.localdate()
+
+
 @retry_sqlite()
 @transaction.atomic
 def lease_next_source(owner=None, lease_minutes=20):
@@ -104,10 +112,16 @@ def crawl_source(source: Source):
                     host = (urlsplit(url).hostname or "").lower()
                     if host != source.domain and not host.endswith("." + source.domain):
                         continue
+                    if hinted_date and not published_today(hinted_date):
+                        continue
                     try:
                         page = fetch_url(url, playwright=source.use_playwright, delay=source.download_delay_seconds)
                         run.fetched_count += 1
                         article = extract_article(source, page, hinted_date)
+                        if not published_today(article["published_at"]):
+                            run.rejected_count += 1
+                            errors.append({"url": url, "reason": "not published on the current date"})
+                            continue
                         if len(article["title"].strip()) < 5 or len(article["body"].strip()) < 200:
                             run.rejected_count += 1
                             errors.append({"url": url, "reason": "missing title or body shorter than 200 characters"})

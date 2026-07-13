@@ -4,7 +4,15 @@ import pytest
 from django.utils import timezone
 
 from collector.models import Source, SourceRuntimeState
-from collector.services.crawler import lease_next_source
+from collector.services.crawler import lease_next_source, published_today
+
+
+def test_published_today_accepts_only_current_date():
+    assert published_today(timezone.now())
+    assert published_today(timezone.now().replace(tzinfo=None))
+    assert not published_today(None)
+    assert not published_today(timezone.now() - timedelta(days=1))
+    assert not published_today(timezone.now() + timedelta(days=1))
 
 
 @pytest.mark.django_db

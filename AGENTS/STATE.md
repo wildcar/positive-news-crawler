@@ -20,9 +20,10 @@ Operate a single-host multilingual news crawler whose source list improves from 
 - Rejected source candidates (checked 2026-07-13): regions.ru (403 for this host), citysakh.ru and sdelanounas.ru (feed URLs return HTML), sib.fm/asi.org.ru/goodnewsfinland.com (no working feed), mos.ru (connection failure), scientificrussia.ru (robots.txt disallows `/rss/` and article listings).
 - `fetch_url` decompresses gzip bodies by magic bytes; the previous case-sensitive `Content-Encoding` lookup silently broke sources whose servers send lowercase headers (found via ria.ru).
 
+- The crawler saves only articles published on the current date (UTC `TIME_ZONE`): stale feed entries are skipped before download, undated or older articles are rejected; rows not published on 2026-07-13 were purged from the production database the same day.
+
 ## Next
 
-- Deploy the pushed gzip fix (`sudo /opt/newscrawler/scripts/update-ubuntu.sh`) so the RIA HTML listing starts collecting; deployment was blocked in the agent session pending operator approval.
 - Register every local SQLite client service in `/etc/newscrawler/update-services` and create the UI operator.
 - Watch crawl runs and positive-yield statistics for the initial sources; tune per-site rules (selectors, intervals, Playwright) where extraction fails.
 

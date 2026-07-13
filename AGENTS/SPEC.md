@@ -36,6 +36,7 @@ External selector <- exchange views -> append-only review events-+
 - ✅ Preserve feed ETag and Last-Modified values.
 - ✅ Obey robots, identify the user agent, apply delays/timeouts/backoff, reject private/reserved addresses and protected paths.
 - ✅ Extract title, text, author, date, language, canonical URL, metadata, and outbound links.
+- ✅ Save only articles published on the current date in the active time zone (`TIME_ZONE`, UTC in production); reject undated articles and skip stale feed entries before download.
 - ✅ Allow per-source URL regexes, CSS selectors, delay, interval, and Playwright setting.
 
 ### Storage and duplicate handling

@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-13 · Current-date-only collection
+- What: `crawl_source` saves only articles published on the current date (`published_today` gate: stale feed entries skipped before download, undated or older articles rejected at ingest); stale pre-existing rows purged from the production database.
+- Why: Operator decision — the pipeline should hold only same-day news; 619 of 969 initially collected articles were older backfill.
+- Files: `collector/services/crawler.py`, `tests/test_worker.py`, `AGENTS/SPEC.md`, `AGENTS/*`
+- Next: Verify the next crawl cycle saves only current-date articles and watch per-source yields under the date filter.
+
 ## 2026-07-13 · Case-insensitive gzip response handling
 - What: `fetch_url` now detects gzip bodies by magic bytes (`decompress_gzip_body`) instead of a case-sensitive `Content-Encoding` dict lookup; added a unit test.
 - Why: ria.ru sends lowercase `content-encoding: gzip`, so bodies stayed compressed and HTML listings silently produced zero candidate links (run "success" with 0 articles).
