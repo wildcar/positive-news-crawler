@@ -6,7 +6,7 @@ Host facts, tools, credentials pointers, and command cheat-sheet for this projec
 
 - **Dev**: Windows, PowerShell, repository `D:\repo\positive-news-crawler`.
 - **Supported runtime**: Windows or Ubuntu on one machine with a local filesystem.
-- **Production templates**: `/opt/newsagg`, service user `newsagg`; see `deploy/systemd/`.
+- **Production templates**: `/opt/newscrawler`, service user `newscrawler`; see `deploy/systemd/`.
 
 ## Tools
 
@@ -17,7 +17,7 @@ Host facts, tools, credentials pointers, and command cheat-sheet for this projec
 
 ## Credentials & secrets
 
-- Runtime values come from `NEWSAGG_*` environment variables; template: `.env.example`.
+- Runtime values come from `NEWSCRAWLER_*` environment variables; template: `.env.example`.
 - Never store the Django secret key, operator password, or site credentials in the repository.
 - `.env`, `data/*.sqlite3`, backups, logs, and lock files are gitignored.
 
@@ -36,7 +36,7 @@ Host facts, tools, credentials pointers, and command cheat-sheet for this projec
 ./scripts/install.ps1
 ./.venv/Scripts/python.exe manage.py migrate
 ./.venv/Scripts/python.exe manage.py createoperator operator
-./.venv/Scripts/python.exe -m waitress --listen=127.0.0.1:8000 newsagg.wsgi:application
+./.venv/Scripts/python.exe -m waitress --listen=127.0.0.1:8000 newscrawler.wsgi:application
 ./.venv/Scripts/python.exe manage.py runworker
 ./.venv/Scripts/python.exe -m pytest
 ```
@@ -49,9 +49,9 @@ When using the already installed system Python during development, replace `./.v
 sh scripts/install.sh
 .venv/bin/python manage.py migrate
 .venv/bin/python manage.py createoperator operator
-sudo cp deploy/systemd/newsagg-*.service /etc/systemd/system/
+sudo cp deploy/systemd/newscrawler-*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now newsagg-web newsagg-worker
+sudo systemctl enable --now newscrawler-web newscrawler-worker
 ```
 
 ### Diagnostics
@@ -74,6 +74,5 @@ python -m pytest
 
 ### Prod
 
-- Set `NEWSAGG_SECURE=1` only after HTTPS termination is configured.
+- Set `NEWSCRAWLER_SECURE=1` only after HTTPS termination is configured.
 - Playwright on Ubuntu needs browser system packages; `scripts/install.sh` uses `--with-deps`.
-

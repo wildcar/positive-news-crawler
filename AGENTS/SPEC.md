@@ -4,6 +4,13 @@
 
 Collect multilingual articles from public mainstream and niche news sites into a local database. A separate asynchronous selector evaluates whether a logical news item is positive. Its append-only feedback drives source discovery and automatically pauses consistently low-yield sources. A single operator manages the system through a small authenticated website.
 
+## Naming contract
+
+- Product and repository name: `positive-news-crawler` / Positive News Crawler.
+- Django project package, deployment directory, and operating-system service account: `newscrawler`.
+- Runtime environment variable prefix: `NEWSCRAWLER_`.
+- Runtime database, log, backup, service, and scheduled-task names use `newscrawler` or Positive News Crawler exclusively.
+
 ## Stack
 
 - Python 3.13 or 3.14; Django 5.2 LTS and server-rendered templates.
@@ -67,7 +74,7 @@ External selector <- exchange views -> append-only review events-+
 
 ```text
 collector/       Django domain, migrations, services, commands, views
-newsagg/         Django project configuration
+newscrawler/     Django project configuration
 templates/       Russian operator interface
 tests/           parser, policy, database contract, UI and worker tests
 docs/            selector contract and ADRs
@@ -96,4 +103,3 @@ See `AGENTS/STATE.md` for the live snapshot.
 - Public HTTP(S) RSS/Atom feeds, sitemaps, and article/listing HTML.
 - No search API, paid publisher account, CAPTCHA bypass, remote DB, Redis, or Celery.
 - External selector is a separate process that shares the same local SQLite file.
-

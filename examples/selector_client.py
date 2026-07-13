@@ -4,7 +4,7 @@ import sqlite3
 import uuid
 from datetime import datetime, timezone
 
-database = os.environ.get("NEWSAGG_DB_PATH", "data/newsagg.sqlite3")
+database = os.environ.get("NEWSCRAWLER_DB_PATH", "data/newscrawler.sqlite3")
 connection = sqlite3.connect(database, timeout=30)
 connection.execute("PRAGMA journal_mode=WAL")
 connection.execute("PRAGMA foreign_keys=ON")
@@ -34,4 +34,3 @@ if row:
           str(uuid.uuid4()), datetime.now(timezone.utc).isoformat()))
     connection.commit()
 connection.close()
-

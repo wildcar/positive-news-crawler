@@ -1,6 +1,6 @@
-# Positive News Aggregator
+# Positive News Crawler
 
-Небольшой мультиязычный агрегатор публичных новостей. Он собирает статьи в локальную SQLite-базу, объединяет перепечатки и предоставляет стабильный SQL-контракт внешнему процессу, который оценивает позитивность. Обратная связь автоматически влияет на список источников.
+Небольшой мультиязычный краулер публичных новостей. Он собирает статьи в локальную SQLite-базу, объединяет перепечатки и предоставляет стабильный SQL-контракт внешнему процессу, который оценивает позитивность. Обратная связь автоматически влияет на список источников.
 
 ## Возможности
 
@@ -23,8 +23,8 @@ Windows PowerShell:
 Copy-Item .env.example .env
 ./scripts/install.ps1
 ./.venv/Scripts/python.exe manage.py createoperator operator
-$env:NEWSAGG_SECRET_KEY = "replace-with-a-long-random-secret"
-./.venv/Scripts/python.exe -m waitress --listen=127.0.0.1:8000 newsagg.wsgi:application
+$env:NEWSCRAWLER_SECRET_KEY = "replace-with-a-long-random-secret"
+./.venv/Scripts/python.exe -m waitress --listen=127.0.0.1:8000 newscrawler.wsgi:application
 ```
 
 В другом окне:
@@ -40,7 +40,7 @@ cp .env.example .env
 sh scripts/install.sh
 .venv/bin/python manage.py createoperator operator
 set -a; . ./.env; set +a
-.venv/bin/python -m waitress --listen=127.0.0.1:8000 newsagg.wsgi:application
+.venv/bin/python -m waitress --listen=127.0.0.1:8000 newscrawler.wsgi:application
 ```
 
 В другом терминале:
@@ -50,7 +50,7 @@ set -a; . ./.env; set +a
 .venv/bin/python manage.py runworker
 ```
 
-UI будет доступен на `http://127.0.0.1:8000/`. Для production разместите reverse proxy с HTTPS перед Waitress и задайте `NEWSAGG_SECURE=1`.
+UI будет доступен на `http://127.0.0.1:8000/`. Для production разместите reverse proxy с HTTPS перед Waitress и задайте `NEWSCRAWLER_SECURE=1`.
 
 > Django не читает `.env` автоматически. При ручном запуске экспортируйте значения в окружение; systemd использует файл напрямую. В Windows постоянные значения можно задать через системные переменные среды.
 
@@ -87,7 +87,7 @@ python manage.py runworker --once
 Отборщик открывает тот же локальный файл, устанавливая обязательные pragma:
 
 ```python
-connection = sqlite3.connect("data/newsagg.sqlite3", timeout=30)
+connection = sqlite3.connect("data/newscrawler.sqlite3", timeout=30)
 connection.execute("PRAGMA journal_mode=WAL")
 connection.execute("PRAGMA foreign_keys=ON")
 connection.execute("PRAGMA busy_timeout=30000")
@@ -116,12 +116,12 @@ connection.execute("PRAGMA busy_timeout=30000")
 
 ## Нативные службы
 
-Шаблоны systemd находятся в `deploy/systemd`. Они предполагают установку в `/opt/newsagg` и пользователя `newsagg`:
+Шаблоны systemd находятся в `deploy/systemd`. Они предполагают установку в `/opt/newscrawler` и пользователя `newscrawler`:
 
 ```bash
-sudo cp deploy/systemd/newsagg-*.service /etc/systemd/system/
+sudo cp deploy/systemd/newscrawler-*.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now newsagg-web newsagg-worker
+sudo systemctl enable --now newscrawler-web newscrawler-worker
 ```
 
 На Windows после установки запустите PowerShell от имени администратора:
@@ -147,4 +147,3 @@ Live smoke-тесты реальных сайтов намеренно не вх
 - только публичные HTTP(S) сайты;
 - файл SQLite нельзя размещать на NFS/SMB/OneDrive и нельзя открывать с другого компьютера;
 - процесс классификации позитивности не входит в проект.
-

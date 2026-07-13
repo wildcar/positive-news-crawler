@@ -1,0 +1,19 @@
+[Unit]
+Description=Positive News Crawler worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=newscrawler
+Group=newscrawler
+WorkingDirectory=/opt/newscrawler
+EnvironmentFile=/opt/newscrawler/.env
+ExecStart=/opt/newscrawler/.venv/bin/python manage.py runworker
+Restart=always
+RestartSec=10
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

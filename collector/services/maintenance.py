@@ -112,9 +112,9 @@ def purge_old_content(days=90):
 
 
 def create_backup(keep=7):
-    backup_dir = settings.NEWSAGG_BACKUP_DIR
+    backup_dir = settings.NEWSCRAWLER_BACKUP_DIR
     backup_dir.mkdir(parents=True, exist_ok=True)
-    filename = backup_dir / f"newsagg-{timezone.now():%Y%m%d-%H%M%S}.sqlite3"
+    filename = backup_dir / f"newscrawler-{timezone.now():%Y%m%d-%H%M%S}.sqlite3"
     source = None
     destination = None
     backup_error = None
@@ -137,7 +137,7 @@ def create_backup(keep=7):
         if filename.exists():
             filename.unlink()
         raise backup_error
-    backups = sorted(backup_dir.glob("newsagg-*.sqlite3"), reverse=True)
+    backups = sorted(backup_dir.glob("newscrawler-*.sqlite3"), reverse=True)
     for old in backups[keep:]:
         old.unlink()
     OperatorEvent.objects.create(event_type="backup_success", message=f"Создана резервная копия {filename.name}", details={"path": str(filename)})

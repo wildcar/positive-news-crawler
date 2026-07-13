@@ -90,7 +90,7 @@ sh scripts/install.sh
 python manage.py migrate
 python manage.py createoperator operator
 # web / worker
-python -m waitress --listen=127.0.0.1:8000 newsagg.wsgi:application
+python -m waitress --listen=127.0.0.1:8000 newscrawler.wsgi:application
 python manage.py runworker
 # verify
 python manage.py check
@@ -123,4 +123,3 @@ deploy/ and scripts/                Ubuntu and Windows operation
 - Keep network, persistence, and policy logic in `collector/services`; views and management commands should stay thin.
 - Use timezone-aware UTC datetimes and short SQLite transactions with retry on lock contention.
 - Add deterministic fixture tests for parser behavior; real-site smoke tests must remain optional.
-

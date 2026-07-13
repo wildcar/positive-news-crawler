@@ -47,7 +47,7 @@ def test_retention_keeps_tombstone():
 
 @pytest.mark.django_db
 def test_backup_is_valid(tmp_path, settings):
-    settings.NEWSAGG_BACKUP_DIR = tmp_path
+    settings.NEWSCRAWLER_BACKUP_DIR = tmp_path
     settings.DB_PATH = tmp_path / "source.sqlite3"
     source = sqlite3.connect(settings.DB_PATH)
     source.execute("CREATE TABLE sample(value TEXT)")
