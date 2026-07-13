@@ -1,6 +1,11 @@
 import pytest
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+
+
+def test_secure_proxy_header_is_configured():
+    assert settings.SECURE_PROXY_SSL_HEADER == ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 @pytest.mark.django_db
@@ -17,4 +22,3 @@ def test_operator_can_open_dashboard(client):
     response = client.get(reverse("dashboard"))
     assert response.status_code == 200
     assert "Состояние системы" in response.content.decode()
-

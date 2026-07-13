@@ -70,7 +70,8 @@ External selector <- exchange views -> append-only review events-+
 - ✅ CLI commands for operator creation, worker, and maintenance.
 - ✅ Windows/Ubuntu install and service files, structured rotating logs, CI matrix.
 - ✅ Reproducible Ubuntu production layout, shared local SQLite group access, and guarded fast-forward update with backup/rollback.
-- ⏳ Real-source smoke validation and production reverse-proxy deployment are environment-specific follow-up work.
+- ✅ Production Nginx/HTTPS reverse proxy for `newscrawler.wildcar.org`, with Waitress restricted to loopback and Django honoring the proxy TLS scheme.
+- ⏳ Real-source smoke validation is environment-specific follow-up work.
 
 ## Project structure
 
@@ -90,6 +91,7 @@ deploy/systemd/  Ubuntu service units
 - Store production configuration in `/etc/newscrawler/newscrawler.env`, application code in `/opt/newscrawler`, mutable database/backups/browser state in `/var/lib/newscrawler`, and logs in `/var/log/newscrawler`.
 - Run services as the non-login `newscrawler` system user and group; grant other local database clients group membership rather than ownership of the application tree.
 - Run migrations, create the operator, install Chromium, then start Waitress and exactly one worker.
+- Publish the operator UI only through the HTTPS reverse proxy; keep Waitress on `127.0.0.1:8000` and serve collected static files directly from Nginx.
 - Keep the database, backup directory, logs, worker, UI, and every direct SQLite client on the same local filesystem and machine.
 - Stop all registered database clients before updates; take and verify a SQLite backup before migrations.
 - Detailed procedures are in `docs/ubuntu-deployment.md`, `README.md`, and `AGENTS/ENV.md`.

@@ -35,7 +35,7 @@ $env:NEWSCRAWLER_SECRET_KEY = "replace-with-a-long-random-secret"
 
 Для production-развёртывания на Ubuntu — включая системного пользователя, каталоги, права общей SQLite-базы, Chromium, systemd и обновления — используйте [пошаговую инструкцию](docs/ubuntu-deployment.md).
 
-UI локального запуска будет доступен на `http://127.0.0.1:8000/`. Для production разместите reverse proxy с HTTPS перед Waitress и задайте `NEWSCRAWLER_SECURE=1`.
+UI локального запуска будет доступен на `http://127.0.0.1:8000/`. Production-сайт `newscrawler.wildcar.org` публикуется через Nginx с HTTPS; Waitress остаётся на loopback. Пошаговая настройка описана в `docs/ubuntu-deployment.md`.
 
 > Django не читает `.env` автоматически. При ручном запуске экспортируйте значения в окружение; systemd использует `/etc/newscrawler/newscrawler.env`. В Windows постоянные значения можно задать через системные переменные среды.
 

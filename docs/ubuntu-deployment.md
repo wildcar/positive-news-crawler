@@ -210,9 +210,44 @@ curl -I http://127.0.0.1:8000/login/
 sudo journalctl -u newscrawler-web.service -u newscrawler-worker.service -n 100 --no-pager
 ```
 
-Waitress слушает только `127.0.0.1:8000`. Для внешнего доступа настройте Nginx/Caddy/другой reverse proxy с HTTPS; не публикуйте Waitress напрямую.
+Waitress слушает только `127.0.0.1:8000`. Не публикуйте его напрямую.
 
-## 11. Дать другим локальным процессам доступ к базе
+## 11. Опубликовать UI через Nginx и HTTPS
+
+Домен `newscrawler.wildcar.org` должен указывать на production-хост. Установите Nginx и Certbot, затем подключите конфигурацию сайта:
+
+```bash
+sudo apt install -y nginx certbot python3-certbot-nginx
+sudo install -o root -g root -m 0644 \
+  /opt/newscrawler/deploy/nginx/newscrawler.conf \
+  /etc/nginx/sites-available/newscrawler
+sudo ln -s /etc/nginx/sites-available/newscrawler \
+  /etc/nginx/sites-enabled/newscrawler
+sudo nginx -t
+sudo systemctl reload nginx
+sudo certbot --nginx -d newscrawler.wildcar.org --redirect
+```
+
+Certbot получит сертификат, добавит TLS в server block и перенаправит HTTP на HTTPS. После успешной выдачи сертификата задайте в `/etc/newscrawler/newscrawler.env`:
+
+```text
+NEWSCRAWLER_ALLOWED_HOSTS=127.0.0.1,localhost,newscrawler.wildcar.org
+NEWSCRAWLER_CSRF_TRUSTED_ORIGINS=https://newscrawler.wildcar.org
+NEWSCRAWLER_SECURE=1
+```
+
+Перезапустите web-сервис и проверьте внешний endpoint, TLS-сертификат и привязку Waitress:
+
+```bash
+sudo systemctl restart newscrawler-web.service
+curl -I https://newscrawler.wildcar.org/login/
+sudo certbot renew --dry-run
+sudo ss -ltnp | grep ':8000'
+```
+
+Ожидается HTTPS-ответ без цикла редиректов; порт 8000 должен остаться привязанным только к `127.0.0.1`. Django доверяет `X-Forwarded-Proto` из-за этой loopback-границы; не меняйте адрес Waitress на внешний.
+
+## 12. Дать другим локальным процессам доступ к базе
 
 Для каждого отдельного системного пользователя процесса выполните:
 
@@ -245,7 +280,7 @@ sudo -u selector-user sqlite3 /var/lib/newscrawler/newscrawler.sqlite3 \
 
 Ровно один экземпляр `newscrawler-worker.service` может работать с базой. Дополнительные процессы используют только стабильный `exchange_*` контракт.
 
-## 12. Настроить обновление
+## 13. Настроить обновление
 
 Скрипт всегда останавливает web и worker. Если другие systemd-сервисы открывают SQLite, перечислите их по одному в файле:
 
@@ -297,7 +332,7 @@ sudo systemctl is-active newscrawler-web.service newscrawler-worker.service
 sudo sqlite3 /var/lib/newscrawler/newscrawler.sqlite3 'PRAGMA integrity_check;'
 ```
 
-## 13. Диагностика прав доступа
+## 14. Диагностика прав доступа
 
 Если клиент получает `attempt to write a readonly database`, проверяйте не только файл базы, но и каталог и sidecar-файлы:
 

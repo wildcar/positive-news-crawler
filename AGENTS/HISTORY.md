@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-13 · Nginx HTTPS reverse-proxy support
+- What: Added the Nginx site, trusted proxy scheme handling, deployment procedure, and a regression assertion for `newscrawler.wildcar.org`.
+- Why: Publish the operator UI through HTTPS while keeping Waitress bound only to loopback.
+- Files: `deploy/nginx/`, `newscrawler/settings.py`, `docs/ubuntu-deployment.md`, `tests/test_ui.py`, `AGENTS/*`
+- Next: Activate the site and certificate on the production host and verify external HTTPS access.
+
 ## 2026-07-13 · Shared SQLite mode normalization
 - What: Added explicit `0660` initialization and systemd pre-start normalization for the production SQLite database.
 - Why: SQLite creates a new database with default `0644` permissions, which became `0640` and blocked other group members from writing.
