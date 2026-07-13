@@ -10,7 +10,7 @@ Host facts, tools, credentials pointers, and command cheat-sheet for this projec
 
 ## Tools
 
-- Python `>=3.13,<3.15`; implementation was verified with Python 3.14.5.
+- Python `>=3.12,<3.15`; implementation was verified locally with Python 3.14.5 and Python 3.12 is covered by CI.
 - Django 5.2 LTS, SQLite from the selected Python runtime.
 - Playwright Chromium installed by `python -m playwright install chromium`.
 - Git is optional until the target directory is initialized and a remote is configured.

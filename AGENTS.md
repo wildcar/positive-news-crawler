@@ -80,7 +80,7 @@ History entries use at most five lines:
 
 ## Stack & Commands
 
-Python 3.13/3.14, Django 5.2 LTS, SQLite WAL, Trafilatura, Feedparser, Playwright Chromium, Waitress, Pytest.
+Python 3.12/3.13/3.14, Django 5.2 LTS, SQLite WAL, Trafilatura, Feedparser, Playwright Chromium, Waitress, Pytest.
 
 ```bash
 # install (Windows)
@@ -120,7 +120,7 @@ deploy/ and scripts/                Ubuntu and Windows operation
 
 ## Code Style
 
-- Follow Python 3.13+ idioms, PEP 8, type hints on public service boundaries, and snake_case identifiers.
+- Follow Python 3.12+ idioms, PEP 8, type hints on public service boundaries, and snake_case identifiers.
 - Keep network, persistence, and policy logic in `collector/services`; views and management commands should stay thin.
 - Use timezone-aware UTC datetimes and short SQLite transactions with retry on lock contention.
 - Add deterministic fixture tests for parser behavior; real-site smoke tests must remain optional.

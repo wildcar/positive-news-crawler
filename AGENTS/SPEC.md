@@ -13,7 +13,7 @@ Collect multilingual articles from public mainstream and niche news sites into a
 
 ## Stack
 
-- Python 3.13 or 3.14; Django 5.2 LTS and server-rendered templates.
+- Python 3.12, 3.13, or 3.14; Django 5.2 LTS and server-rendered templates.
 - SQLite in WAL mode on a local disk; one web process, one crawler worker, and same-host client processes using the exchange contract.
 - Feedparser for RSS/Atom, XML sitemap parsing, Trafilatura for main-text extraction, Playwright Chromium only for configured JS sites.
 - Waitress for the web process; systemd on Ubuntu and Task Scheduler on Windows.
@@ -97,7 +97,7 @@ deploy/systemd/  Ubuntu service units
 ## Current state
 
 - ✅ MVP implemented, migrated, and verified on Windows/Python 3.14.5.
-- ✅ Sixteen deterministic tests pass; SQLite integrity and exchange objects are verified.
+- ✅ Sixteen deterministic tests pass; SQLite integrity and exchange objects are verified; CI covers Python 3.12, 3.13, and 3.14 on Ubuntu and Windows.
 - ⏳ Configure real operator credentials and add initial production sources on the destination host.
 
 See `AGENTS/STATE.md` for the live snapshot.

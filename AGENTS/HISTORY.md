@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-13 · Ubuntu 24.04 and Python 3.12 support
+- What: Extended the supported Python range to 3.12, added it to the CI matrix, and retargeted the Ubuntu guide to the stock 24.04 runtime.
+- Why: Deploy cleanly on the destination Ubuntu 24.04 LTS host without third-party Python packages.
+- Files: `pyproject.toml`, `.github/workflows/ci.yml`, `docs/ubuntu-deployment.md`, `README.md`, `AGENTS/*`
+- Next: Run the documented deployment on the destination host and verify the live systemd services.
+
 ## 2026-07-13 · Ubuntu production deployment and updater
 - What: Added the production filesystem/user model, shared SQLite group permissions, hardened systemd units, full deployment guide, and guarded update script with backup/rollback.
 - Why: Support sudo-driven installation and safe same-host database access by multiple local service accounts.

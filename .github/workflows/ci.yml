@@ -5,7 +5,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python: ['3.13', '3.14']
+        python: ['3.12', '3.13', '3.14']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -17,4 +17,3 @@ jobs:
       - run: python manage.py migrate
       - run: python manage.py check
       - run: python -m pytest
-
