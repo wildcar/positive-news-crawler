@@ -3,7 +3,7 @@
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
 ## 2026-07-13 · Nginx HTTPS reverse-proxy support
-- What: Added the Nginx site, trusted proxy scheme handling, deployment procedure, and a regression assertion for `newscrawler.wildcar.org`.
+- What: Added the Nginx site, loopback-only forwarded-scheme trust in Waitress/Django, deployment procedure, and regression assertions for `newscrawler.wildcar.org`.
 - Why: Publish the operator UI through HTTPS while keeping Waitress bound only to loopback.
 - Files: `deploy/nginx/`, `newscrawler/settings.py`, `docs/ubuntu-deployment.md`, `tests/test_ui.py`, `AGENTS/*`
 - Next: Activate the site and certificate on the production host and verify external HTTPS access.
