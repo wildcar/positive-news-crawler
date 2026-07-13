@@ -25,6 +25,7 @@ Positive News Crawler — multilingual public-news collector with SQLite feedbac
 | `AGENTS/ENV.md` | Hosts, tools, secrets pointers, command cheat-sheet. |
 | `README.md` | User-facing installation, operation, and selector contract. |
 | `docs/database-contract.md` | Stable direct-SQLite selector interface. |
+| `docs/ubuntu-deployment.md` | Ubuntu production deployment, shared SQLite permissions, and update procedure. |
 | `docs/adr/` | Architecture Decision Records. |
 
 ## Startup Checklist

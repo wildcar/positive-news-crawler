@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-13 · Ubuntu production deployment and updater
+- What: Added the production filesystem/user model, shared SQLite group permissions, hardened systemd units, full deployment guide, and guarded update script with backup/rollback.
+- Why: Support sudo-driven installation and safe same-host database access by multiple local service accounts.
+- Files: `docs/ubuntu-deployment.md`, `scripts/update-ubuntu.sh`, `deploy/`, `README.md`, `AGENTS/*`
+- Next: Deploy on the target host, register selector units, configure HTTPS, and run live source smoke tests.
+
 ## 2026-07-13 · Unified crawler naming
 - What: Renamed the Django package and every runtime, deployment, database, log, environment, UI, and package identifier to the crawler naming contract.
 - Why: Remove conflicting product terminology and standardize the internal folder and service account as `newscrawler`.

@@ -33,26 +33,11 @@ $env:NEWSCRAWLER_SECRET_KEY = "replace-with-a-long-random-secret"
 ./.venv/Scripts/python.exe manage.py runworker
 ```
 
-Ubuntu:
+Для production-развёртывания на Ubuntu — включая системного пользователя, каталоги, права общей SQLite-базы, Chromium, systemd и обновления — используйте [пошаговую инструкцию](docs/ubuntu-deployment.md).
 
-```bash
-cp .env.example .env
-sh scripts/install.sh
-.venv/bin/python manage.py createoperator operator
-set -a; . ./.env; set +a
-.venv/bin/python -m waitress --listen=127.0.0.1:8000 newscrawler.wsgi:application
-```
+UI локального запуска будет доступен на `http://127.0.0.1:8000/`. Для production разместите reverse proxy с HTTPS перед Waitress и задайте `NEWSCRAWLER_SECURE=1`.
 
-В другом терминале:
-
-```bash
-set -a; . ./.env; set +a
-.venv/bin/python manage.py runworker
-```
-
-UI будет доступен на `http://127.0.0.1:8000/`. Для production разместите reverse proxy с HTTPS перед Waitress и задайте `NEWSCRAWLER_SECURE=1`.
-
-> Django не читает `.env` автоматически. При ручном запуске экспортируйте значения в окружение; systemd использует файл напрямую. В Windows постоянные значения можно задать через системные переменные среды.
+> Django не читает `.env` автоматически. При ручном запуске экспортируйте значения в окружение; systemd использует `/etc/newscrawler/newscrawler.env`. В Windows постоянные значения можно задать через системные переменные среды.
 
 ## Работа worker
 
@@ -93,6 +78,8 @@ connection.execute("PRAGMA foreign_keys=ON")
 connection.execute("PRAGMA busy_timeout=30000")
 ```
 
+На Ubuntu production путь базы — `/var/lib/newscrawler/newscrawler.sqlite3`; клиент должен работать на том же хосте под пользователем из группы `newscrawler`.
+
 Доступны:
 
 - `exchange_news_for_selection` — непустые новости, основной URL и JSON-массив всех публикаций;
@@ -116,13 +103,15 @@ connection.execute("PRAGMA busy_timeout=30000")
 
 ## Нативные службы
 
-Шаблоны systemd находятся в `deploy/systemd`. Они предполагают установку в `/opt/newscrawler` и пользователя `newscrawler`:
+Шаблоны systemd находятся в `deploy/systemd`. Они используют `/opt/newscrawler`, конфигурацию `/etc/newscrawler/newscrawler.env`, общую базу в `/var/lib/newscrawler` и пользователя/группу `newscrawler`:
 
 ```bash
 sudo cp deploy/systemd/newscrawler-*.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now newscrawler-web newscrawler-worker
 ```
+
+Полная установка и безопасное обновление описаны в [docs/ubuntu-deployment.md](docs/ubuntu-deployment.md). Обновление установленной системы запускается командой `sudo /opt/newscrawler/scripts/update-ubuntu.sh`.
 
 На Windows после установки запустите PowerShell от имени администратора:
 

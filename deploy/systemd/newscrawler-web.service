@@ -1,18 +1,24 @@
 [Unit]
 Description=Positive News Crawler web UI
 After=network.target
+ConditionPathExists=/etc/newscrawler/newscrawler.env
+ConditionPathIsDirectory=/var/lib/newscrawler
 
 [Service]
 Type=simple
 User=newscrawler
 Group=newscrawler
 WorkingDirectory=/opt/newscrawler
-EnvironmentFile=/opt/newscrawler/.env
+EnvironmentFile=/etc/newscrawler/newscrawler.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+UMask=0007
 ExecStart=/opt/newscrawler/.venv/bin/python -m waitress --listen=127.0.0.1:8000 newscrawler.wsgi:application
 Restart=always
 RestartSec=5
 PrivateTmp=true
 NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/newscrawler /var/log/newscrawler
 
 [Install]
 WantedBy=multi-user.target

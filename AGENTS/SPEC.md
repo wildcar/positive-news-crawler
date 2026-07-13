@@ -14,7 +14,7 @@ Collect multilingual articles from public mainstream and niche news sites into a
 ## Stack
 
 - Python 3.13 or 3.14; Django 5.2 LTS and server-rendered templates.
-- SQLite in WAL mode on a local disk; one web process, one crawler worker, one local selector.
+- SQLite in WAL mode on a local disk; one web process, one crawler worker, and same-host client processes using the exchange contract.
 - Feedparser for RSS/Atom, XML sitemap parsing, Trafilatura for main-text extraction, Playwright Chromium only for configured JS sites.
 - Waitress for the web process; systemd on Ubuntu and Task Scheduler on Windows.
 
@@ -42,6 +42,7 @@ External selector <- exchange views -> append-only review events-+
 
 - ✅ Configure WAL, foreign keys, 30-second busy timeout, and normal synchronization on Django connections.
 - ✅ Allow one worker via OS file lock; lease due sources and recover expired leases.
+- ✅ On Ubuntu, store production SQLite state in `/var/lib/newscrawler`, shared by the local `newscrawler` group through a setgid directory, default ACLs, and `umask 0007`; every database client must run on the same host and belong to that group.
 - ✅ Group exact normalized-body SHA-256 duplicates.
 - ✅ Group near duplicates of the same language within 48 hours using SimHash and title similarity; translations remain separate.
 - ✅ Retain every occurrence/source URL while exposing one logical item to the selector.
@@ -68,6 +69,7 @@ External selector <- exchange views -> append-only review events-+
 - ✅ Single local operator account; authenticated dashboard, source editor, news/duplicate view, crawl runs, events, source statistics, backup status.
 - ✅ CLI commands for operator creation, worker, and maintenance.
 - ✅ Windows/Ubuntu install and service files, structured rotating logs, CI matrix.
+- ✅ Reproducible Ubuntu production layout, shared local SQLite group access, and guarded fast-forward update with backup/rollback.
 - ⏳ Real-source smoke validation and production reverse-proxy deployment are environment-specific follow-up work.
 
 ## Project structure
@@ -85,10 +87,12 @@ deploy/systemd/  Ubuntu service units
 
 ## Deployment
 
-- Copy `.env.example` to a host-managed environment configuration and set secrets outside Git.
+- Store production configuration in `/etc/newscrawler/newscrawler.env`, application code in `/opt/newscrawler`, mutable database/backups/browser state in `/var/lib/newscrawler`, and logs in `/var/log/newscrawler`.
+- Run services as the non-login `newscrawler` system user and group; grant other local database clients group membership rather than ownership of the application tree.
 - Run migrations, create the operator, install Chromium, then start Waitress and exactly one worker.
-- Keep the database, backup directory, logs, worker, UI, and selector on the same machine.
-- Detailed procedures are in `README.md` and `AGENTS/ENV.md`.
+- Keep the database, backup directory, logs, worker, UI, and every direct SQLite client on the same local filesystem and machine.
+- Stop all registered database clients before updates; take and verify a SQLite backup before migrations.
+- Detailed procedures are in `docs/ubuntu-deployment.md`, `README.md`, and `AGENTS/ENV.md`.
 
 ## Current state
 

@@ -2,6 +2,14 @@
 
 Этот контракт предназначен для локального асинхронного отборщика. Миграции Django создают его автоматически.
 
+## Доступ к production-базе на Ubuntu
+
+Production-файл находится в `/var/lib/newscrawler/newscrawler.sqlite3`. Каждый прямой клиент должен работать на том же хосте под отдельным системным пользователем из группы `newscrawler`. Каталог имеет setgid/default ACL, а процессы должны использовать `umask 0007`, чтобы SQLite sidecar-файлы `-wal` и `-shm` оставались доступны группе.
+
+SQLite не поддерживает табличные роли: член группы с правом записи технически может изменить любую таблицу. Прикладной контракт разрешает клиентам читать `exchange_news_for_selection` и `exchange_latest_reviews`, а решения добавлять только в `exchange_review_events`.
+
+Перед миграциями или восстановлением базы остановите все прямые клиенты. systemd units таких клиентов перечисляются в `/etc/newscrawler/update-services`; подробности находятся в [ubuntu-deployment.md](ubuntu-deployment.md).
+
 ## Чтение очереди
 
 ```sql
@@ -50,4 +58,3 @@ INSERT INTO exchange_review_events (
 ## Исправление решения
 
 События неизменяемы. Для исправления вставьте новое событие с другим `idempotency_key`. `exchange_latest_reviews` выберет его по `created_at`, затем по `id`.
-

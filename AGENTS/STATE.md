@@ -10,12 +10,13 @@ Operate a single-host multilingual news crawler whose source list improves from 
 - Git is initialized on `main`; the GitHub remote is `https://github.com/wildcar/positive-news-crawler`.
 - Naming is unified: Positive News Crawler is the product, while `newscrawler` is the Django package, deployment directory, service account, and runtime prefix.
 - SQLite migrations, WAL pragmas, exchange views/triggers, daily backup, retention, source policy, UI, deployment files, and tests are implemented.
+- Ubuntu production deployment is documented with root-owned code/config, group-shared local SQLite state, hardened systemd units, and a guarded update script with backup and rollback.
 - Verified on Windows with Python 3.14.5: Django checks clean, migrations current, 16 tests pass, SQLite integrity is `ok`.
 
 ## Next
 
-- Copy `.env.example` values into host environment and set a strong `NEWSCRAWLER_SECRET_KEY`.
-- Create the operator, add initial sources, and run web plus the single worker.
+- Deploy on the destination Ubuntu host using `docs/ubuntu-deployment.md` and configure a strong `NEWSCRAWLER_SECRET_KEY`.
+- Register every local SQLite client service in `/etc/newscrawler/update-services`, create the UI operator, and add initial sources.
 - Perform opt-in live smoke tests against selected sources and tune per-site rules.
 
 ## Open questions

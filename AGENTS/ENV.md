@@ -6,7 +6,7 @@ Host facts, tools, credentials pointers, and command cheat-sheet for this projec
 
 - **Dev**: Windows, PowerShell, repository `D:\repo\positive-news-crawler`.
 - **Supported runtime**: Windows or Ubuntu on one machine with a local filesystem.
-- **Production templates**: `/opt/newscrawler`, service user `newscrawler`; see `deploy/systemd/`.
+- **Production layout**: code `/opt/newscrawler`, configuration `/etc/newscrawler`, shared local state `/var/lib/newscrawler`, logs `/var/log/newscrawler`, service user/group `newscrawler`.
 
 ## Tools
 
@@ -46,13 +46,12 @@ When using the already installed system Python during development, replace `./.v
 ### Prod — Ubuntu
 
 ```bash
-sh scripts/install.sh
-.venv/bin/python manage.py migrate
-.venv/bin/python manage.py createoperator operator
-sudo cp deploy/systemd/newscrawler-*.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now newscrawler-web newscrawler-worker
+sudo /opt/newscrawler/scripts/update-ubuntu.sh
+sudo systemctl status --no-pager newscrawler-web.service newscrawler-worker.service
+sudo sqlite3 /var/lib/newscrawler/newscrawler.sqlite3 'PRAGMA integrity_check;'
 ```
+
+Initial deployment, shared-group permissions, and update-service registration are documented in `docs/ubuntu-deployment.md`.
 
 ### Diagnostics
 
@@ -76,3 +75,4 @@ python -m pytest
 
 - Set `NEWSCRAWLER_SECURE=1` only after HTTPS termination is configured.
 - Playwright on Ubuntu needs browser system packages; `scripts/install.sh` uses `--with-deps`.
+- All direct SQLite clients must run on the same host, belong to the `newscrawler` group, and be registered in `/etc/newscrawler/update-services` when managed by systemd.
