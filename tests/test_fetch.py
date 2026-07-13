@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from collector.models import Source, SourceEndpoint
-from collector.services.fetch import FetchResult, candidate_urls, extract_article
+from collector.services.fetch import FetchResult, candidate_urls, decompress_gzip_body, extract_article
 
 
 @pytest.fixture
@@ -21,6 +21,13 @@ def test_rss_candidates(rss_result):
     candidates = candidate_urls(endpoint, rss_result)
     assert candidates[0][0] == "https://news.example/story"
     assert candidates[0][1].year == 2026
+
+
+def test_gzip_body_decompressed_by_magic_bytes():
+    page = b"<html><body><a href='https://news.example/story'>x</a></body></html>"
+    assert decompress_gzip_body(gzip.compress(page)) == page
+    assert decompress_gzip_body(page) == page
+    assert decompress_gzip_body(b"") == b""
 
 
 def test_gzipped_sitemap_candidates():

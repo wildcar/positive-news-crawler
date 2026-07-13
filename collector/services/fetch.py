@@ -51,6 +51,10 @@ class FetchResult:
     headers: dict = field(default_factory=dict)
 
 
+def decompress_gzip_body(body: bytes) -> bytes:
+    return gzip.decompress(body) if body[:2] == b"\x1f\x8b" else body
+
+
 def decode_html(result: FetchResult) -> str:
     content_type = result.headers.get("Content-Type", "")
     match = re.search(r"charset=([\w.-]+)", content_type, re.I)
@@ -126,10 +130,9 @@ def fetch_url(url: str, *, etag="", last_modified="", playwright=False, delay=0.
     request = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.build_opener(SafeRedirectHandler()).open(request, timeout=30) as response:
-            body = response.read(10_000_000)
+            # Header names may arrive in any case, so rely on the gzip magic bytes instead.
+            body = decompress_gzip_body(response.read(10_000_000))
             response_headers = dict(response.headers.items())
-            if response_headers.get("Content-Encoding", "").lower() == "gzip":
-                body = gzip.decompress(body)
             return FetchResult(response.geturl(), response.status, body, response_headers)
     except urllib.error.HTTPError as exc:
         if exc.code == 304:

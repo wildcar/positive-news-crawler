@@ -2,8 +2,14 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-13 · Case-insensitive gzip response handling
+- What: `fetch_url` now detects gzip bodies by magic bytes (`decompress_gzip_body`) instead of a case-sensitive `Content-Encoding` dict lookup; added a unit test.
+- Why: ria.ru sends lowercase `content-encoding: gzip`, so bodies stayed compressed and HTML listings silently produced zero candidate links (run "success" with 0 articles).
+- Files: `collector/services/fetch.py`, `tests/test_fetch.py`, `AGENTS/*`
+- Next: Deploy to `/opt/newscrawler`, re-run the RIA source, and confirm articles are saved.
+
 ## 2026-07-13 · Initial production source list
-- What: Added 19 verified sources (8 RU + 11 EN positive-news sites, RSS endpoints checked for HTTP 200, feed validity, freshness, robots.txt) to the production database and repaired the RIA source (removed 404 sitemap endpoint, added `ria\.ru/\d{8}/` include pattern).
+- What: Added 20 verified sources (8 RU + 12 EN positive-news sites: 19 RSS feeds plus the AP Oddities HTML listing, each checked for HTTP 200, feed validity, freshness, robots.txt) to the production database and repaired the RIA source (removed 404 sitemap endpoint, added `ria\.ru/\d{8}/` include pattern).
 - Why: The deployed crawler had an empty working source list; candidates came from `~/repo/hermes/positive-news/registry.md` usage counts and a web search for dedicated positive-news outlets.
 - Files: production SQLite only (no code changes); rejected candidates recorded in `AGENTS/STATE.md`.
 - Next: Watch first crawl runs and positive-yield statistics; tune per-site rules and probation/pauses as feedback arrives.
