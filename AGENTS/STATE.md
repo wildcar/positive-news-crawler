@@ -13,12 +13,11 @@ Operate a single-host multilingual news crawler whose source list improves from 
 - Ubuntu production deployment is documented with root-owned code/config, group-shared local SQLite state, hardened systemd units, and a guarded update script with backup and rollback.
 - Ubuntu 24.04 LTS and its stock Python 3.12 are supported; CI covers Python 3.12, 3.13, and 3.14 on Ubuntu and Windows.
 - Ubuntu deployment explicitly sets the shared SQLite database to `0660`; both crawler systemd units normalize that mode before startup.
-- Nginx reverse-proxy configuration for `newscrawler.wildcar.org` and Django proxy-scheme handling are implemented and ready for production activation.
-- Verified on Windows with Python 3.14.5: Django checks clean, migrations current, 16 tests pass, SQLite integrity is `ok`.
+- `https://newscrawler.wildcar.org` is live behind Nginx with a Let's Encrypt certificate and automatic HTTP-to-HTTPS redirect; Waitress remains restricted to `127.0.0.1:8000`.
+- Verified on Ubuntu/Python 3.12: Django checks clean, migrations current, 18 tests pass, HTTPS login and static endpoints respond, and SQLite integrity is `ok`.
 
 ## Next
 
-- Activate the Nginx site, issue its Let's Encrypt certificate, enable Django secure mode, and verify the public endpoint.
 - Register every local SQLite client service in `/etc/newscrawler/update-services`, create the UI operator, and add initial sources.
 - Perform opt-in live smoke tests against selected sources and tune per-site rules.
 

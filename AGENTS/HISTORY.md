@@ -6,7 +6,7 @@ Newest first. Each entry is at most five lines using the format defined in `AGEN
 - What: Added the Nginx site, loopback-only forwarded-scheme trust in Waitress/Django, deployment procedure, and regression assertions for `newscrawler.wildcar.org`.
 - Why: Publish the operator UI through HTTPS while keeping Waitress bound only to loopback.
 - Files: `deploy/nginx/`, `newscrawler/settings.py`, `docs/ubuntu-deployment.md`, `tests/test_ui.py`, `AGENTS/*`
-- Next: Activate the site and certificate on the production host and verify external HTTPS access.
+- Next: Create the UI operator, add initial sources, and run selected live-source smoke tests.
 
 ## 2026-07-13 · Shared SQLite mode normalization
 - What: Added explicit `0660` initialization and systemd pre-start normalization for the production SQLite database.
