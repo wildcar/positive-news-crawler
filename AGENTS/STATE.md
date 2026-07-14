@@ -21,6 +21,7 @@ Operate a single-host multilingual news crawler whose source list improves from 
 - `fetch_url` decompresses gzip bodies by magic bytes; the previous case-sensitive `Content-Encoding` lookup silently broke sources whose servers send lowercase headers (found via ria.ru).
 
 - The crawler saves only articles published on the current date (UTC `TIME_ZONE`): stale feed entries are skipped before download, undated or older articles are rejected; rows not published on 2026-07-13 were purged from the production database the same day.
+- Agent-authored Russian text must follow the vendored `humanizer-ru` skill (`.claude/skills/humanizer-ru/SKILL.md`, mandated in `AGENTS.md`); crawled article content stays verbatim.
 
 ## Next
 

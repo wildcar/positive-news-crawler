@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-14 · Mandatory humanizer-ru skill
+- What: Vendored the humanizer-ru editing skill v1.2.0 (upstream commit a8b6a4b, MIT) into `.claude/skills/humanizer-ru/` and made it mandatory in `AGENTS.md` for agent-authored Russian text; crawled content stays verbatim.
+- Why: Operator requires all Russian prose deliverables cleaned of AI-generation markers and clerical style.
+- Files: `.claude/skills/humanizer-ru/`, `AGENTS.md`, `AGENTS/STATE.md`
+- Next: Apply the skill to every Russian deliverable in future iterations.
+
 ## 2026-07-13 · Current-date-only collection
 - What: `crawl_source` saves only articles published on the current date (`published_today` gate: stale feed entries skipped before download, undated or older articles rejected at ingest); stale pre-existing rows purged from the production database.
 - Why: Operator decision — the pipeline should hold only same-day news; 619 of 969 initially collected articles were older backfill.

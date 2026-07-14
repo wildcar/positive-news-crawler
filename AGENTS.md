@@ -27,6 +27,7 @@ Positive News Crawler — multilingual public-news collector with SQLite feedbac
 | `docs/database-contract.md` | Stable direct-SQLite selector interface. |
 | `docs/ubuntu-deployment.md` | Ubuntu production deployment, shared SQLite permissions, and update procedure. |
 | `docs/adr/` | Architecture Decision Records. |
+| `.claude/skills/humanizer-ru/SKILL.md` | Mandatory editing rules for agent-authored Russian text (vendored skill). |
 
 ## Startup Checklist
 
@@ -67,6 +68,14 @@ History entries use at most five lines:
 - Conversation with the user: Russian.
 - End-user UI: Russian, designed for later localization.
 - Existing Russian user documentation is an established contract and may remain Russian.
+
+## Mandatory Skill: humanizer-ru
+
+Use of the `humanizer-ru` skill is mandatory. Any Russian prose an agent writes or edits in this project — replies to the user, operator UI strings, Russian user documentation — must follow its rules before delivery.
+
+- The skill is vendored at `.claude/skills/humanizer-ru/SKILL.md` (source: <https://github.com/smixs/humanizer-ru>, v1.2.0, MIT license).
+- Claude Code discovers it automatically as a project skill; agents without skill support must read `SKILL.md` and apply its rules manually.
+- The rule covers agent-authored text only. Crawled article content, quotes, and proper names are data and must stay verbatim — never "humanize" collected news.
 
 ## Project Rules
 
