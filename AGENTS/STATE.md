@@ -22,11 +22,9 @@ Operate a single-host multilingual news crawler whose source list improves from 
 
 - The crawler saves only articles published on the current date (UTC `TIME_ZONE`): stale feed entries are skipped before download, undated or older articles are rejected; rows not published on 2026-07-13 were purged from the production database the same day.
 - Agent-authored Russian text must follow the vendored `humanizer-ru` skill (`.claude/skills/humanizer-ru/SKILL.md`, mandated in `AGENTS.md`); crawled article content stays verbatim.
-- The exchange contract carries the News Evaluator axis set v1 (20 characteristics, integer 0–10): `exchange_evaluation_characteristics` (seeded by migration 0004), append-only `exchange_evaluation_scores` tied to review events, and the `exchange_latest_evaluation_scores` view; documented in `docs/database-contract.md`. Committed and pushed; production migration is still pending.
+- The exchange contract carries the News Evaluator axis set v1 (20 characteristics, integer 0–10): `exchange_evaluation_characteristics` (seeded by migration 0004), append-only `exchange_evaluation_scores` tied to review events, and the `exchange_latest_evaluation_scores` view; documented in `docs/database-contract.md`. Applied on production 2026-07-14 via `update-ubuntu.sh` (f8739e7 → c67532c, backup `pre-update-20260714T221728Z.sqlite3`); 20 seeded characteristics, the view, triggers, services, and integrity verified live.
 
 ## Next
-
-- Apply migrations 0003–0004 (evaluation contract) on production: `sudo /opt/newscrawler/scripts/update-ubuntu.sh` (stops services, backs up, migrates, restarts).
 
 - Register every local SQLite client service in `/etc/newscrawler/update-services` and create the UI operator.
 - Watch crawl runs and positive-yield statistics for the initial sources; tune per-site rules (selectors, intervals, Playwright) where extraction fails.

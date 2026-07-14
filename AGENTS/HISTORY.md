@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-14 · Evaluation contract applied on production
+- What: Ran `update-ubuntu.sh` (f8739e7 → c67532c): migrations 0003–0004 applied, 20 characteristics seeded, scores table with triggers and the `exchange_latest_evaluation_scores` view live; services healthy, integrity `ok`.
+- Why: The evaluator service needs the axis set and score storage in the production database, not only in the codebase.
+- Files: production host only; pre-update backup `pre-update-20260714T221728Z.sqlite3`.
+- Next: Evaluator side — thresholds, prompt, service skeleton; register the future evaluator unit in `/etc/newscrawler/update-services`.
+
 ## 2026-07-14 · Evaluation-score exchange contract
 - What: Added the News Evaluator axis set v1 to the database — `exchange_evaluation_characteristics` reference table (20 rows seeded in migration 0004), append-only `exchange_evaluation_scores` (integer 0–10 per review event and axis, FK-validated keys, triggers), `exchange_latest_evaluation_scores` view — plus contract docs, README, and three tests.
 - Why: The separate evaluator service (`~/repo/positive-news-evaluator`) needs the fixed characteristic set in the shared SQLite and a place to store per-news scores.
