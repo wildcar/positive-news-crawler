@@ -22,6 +22,7 @@ Operate a single-host multilingual news crawler whose source list improves from 
 
 - The crawler saves only articles published on the current date (UTC `TIME_ZONE`): stale feed entries are skipped before download, undated or older articles are rejected; rows not published on 2026-07-13 were purged from the production database the same day.
 - Agent-authored Russian text must follow the vendored `humanizer-ru` skill (`.claude/skills/humanizer-ru/SKILL.md`, mandated in `AGENTS.md`); crawled article content stays verbatim.
+- The exchange contract carries the News Evaluator axis set v1 (20 characteristics, integer 0–10): `exchange_evaluation_characteristics` (seeded by migration 0004), append-only `exchange_evaluation_scores` tied to review events, and the `exchange_latest_evaluation_scores` view; documented in `docs/database-contract.md`.
 
 ## Next
 

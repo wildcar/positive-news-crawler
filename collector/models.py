@@ -165,6 +165,48 @@ class ReviewEvent(models.Model):
         indexes = [models.Index(fields=["news_item", "selector_name", "-created_at"], name="idx_review_latest")]
 
 
+class EvaluationCharacteristic(models.Model):
+    class ThresholdDirection(models.TextChoices):
+        LOWER_BOUND = "lower_bound", "Не ниже порога"
+        UPPER_BOUND = "upper_bound", "Не выше порога"
+
+    key = models.CharField(max_length=64, unique=True)
+    title = models.CharField(max_length=200)
+    category = models.CharField(max_length=100)
+    description = models.TextField()
+    anchor_low = models.CharField(max_length=200)
+    anchor_high = models.CharField(max_length=200)
+    threshold_direction = models.CharField(max_length=16, choices=ThresholdDirection.choices, default=ThresholdDirection.LOWER_BOUND)
+    position = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = "exchange_evaluation_characteristics"
+        ordering = ["position", "id"]
+
+    def __str__(self):
+        return self.key
+
+
+class EvaluationScore(models.Model):
+    review_event = models.ForeignKey(ReviewEvent, on_delete=models.PROTECT, related_name="evaluation_scores")
+    characteristic = models.ForeignKey(
+        EvaluationCharacteristic,
+        to_field="key",
+        db_column="characteristic_key",
+        on_delete=models.PROTECT,
+        related_name="scores",
+    )
+    value = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
+
+    class Meta:
+        db_table = "exchange_evaluation_scores"
+        constraints = [
+            models.UniqueConstraint(fields=["review_event", "characteristic"], name="uq_evaluation_score_axis"),
+            models.CheckConstraint(condition=models.Q(value__gte=0) & models.Q(value__lte=10), name="ck_evaluation_score_range"),
+        ]
+        indexes = [models.Index(fields=["characteristic", "value"], name="idx_eval_axis_value")]
+
+
 class OperatorEvent(models.Model):
     event_type = models.CharField(max_length=64, db_index=True)
     source = models.ForeignKey(Source, null=True, blank=True, on_delete=models.SET_NULL, related_name="operator_events")

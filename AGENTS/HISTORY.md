@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-14 · Evaluation-score exchange contract
+- What: Added the News Evaluator axis set v1 to the database — `exchange_evaluation_characteristics` reference table (20 rows seeded in migration 0004), append-only `exchange_evaluation_scores` (integer 0–10 per review event and axis, FK-validated keys, triggers), `exchange_latest_evaluation_scores` view — plus contract docs, README, and three tests.
+- Why: The separate evaluator service (`~/repo/positive-news-evaluator`) needs the fixed characteristic set in the shared SQLite and a place to store per-news scores.
+- Files: `collector/models.py`, `collector/migrations/0003–0004`, `docs/database-contract.md`, `README.md`, `tests/test_exchange.py`, `AGENTS/*`
+- Next: Apply migrations on production via `update-ubuntu.sh`; evaluator side — thresholds, prompt, service skeleton.
+
 ## 2026-07-14 · Mandatory humanizer-ru skill
 - What: Vendored the humanizer-ru editing skill v1.2.0 (upstream commit a8b6a4b, MIT) into `.claude/skills/humanizer-ru/` and made it mandatory in `AGENTS.md` for agent-authored Russian text; crawled content stays verbatim.
 - Why: Operator requires all Russian prose deliverables cleaned of AI-generation markers and clerical style.

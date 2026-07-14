@@ -84,9 +84,12 @@ connection.execute("PRAGMA busy_timeout=30000")
 
 - `exchange_news_for_selection` — непустые новости, основной URL и JSON-массив всех публикаций;
 - `exchange_review_events` — таблица для вставки решений;
-- `exchange_latest_reviews` — последнее событие по новости и имени отборщика.
+- `exchange_latest_reviews` — последнее событие по новости и имени отборщика;
+- `exchange_evaluation_characteristics` — справочник характеристик оценки (v1, 20 осей), заполняется миграциями, только чтение;
+- `exchange_evaluation_scores` — таблица для вставки оценок 0–10 по осям, по строке на характеристику события;
+- `exchange_latest_evaluation_scores` — оценки последнего события по новости и имени оценщика.
 
-Допустимые решения: `positive`, `not_positive`, `skipped`. `score` либо `NULL`, либо число от 0 до 1. Пара `(selector_name, idempotency_key)` уникальна. `UPDATE` и `DELETE` событий запрещены триггерами; исправление — новое событие.
+Допустимые решения: `positive`, `not_positive`, `skipped`. `score` либо `NULL`, либо число от 0 до 1. Пара `(selector_name, idempotency_key)` уникальна. `UPDATE` и `DELETE` событий и оценок запрещены триггерами; исправление — новое событие, при необходимости с полным набором оценок.
 
 Полный рабочий пример находится в [examples/selector_client.py](examples/selector_client.py).
 

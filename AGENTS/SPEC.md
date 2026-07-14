@@ -56,6 +56,9 @@ External selector <- exchange views -> append-only review events-+
 - ✅ `exchange_review_events` accepts positive/not_positive/skipped events with selector/version/idempotency metadata.
 - ✅ `exchange_latest_reviews` returns the latest event for a news/selector pair.
 - ✅ Unique idempotency constraint and triggers enforce append-only events.
+- ✅ `exchange_evaluation_characteristics` stores the fixed evaluation-axis set (v1: 20 rows seeded by migration, mirroring the News Evaluator spec) with key, Russian title, category, description, 0/10 scale anchors, threshold direction, and position.
+- ✅ `exchange_evaluation_scores` accepts one integer 0–10 score per review event and characteristic key; a foreign key validates keys, uniqueness covers (event, characteristic), and triggers enforce append-only rows — corrections are a new event with a full score set.
+- ✅ `exchange_latest_evaluation_scores` returns the scores attached to the latest review event for a news/selector pair.
 
 ### Source policy
 
@@ -100,7 +103,7 @@ deploy/systemd/  Ubuntu service units
 ## Current state
 
 - ✅ MVP implemented, migrated, and verified on Windows/Python 3.14.5.
-- ✅ Sixteen deterministic tests pass; SQLite integrity and exchange objects are verified; CI covers Python 3.12, 3.13, and 3.14 on Ubuntu and Windows.
+- ✅ Twenty-three deterministic tests pass; SQLite integrity and exchange objects are verified; CI covers Python 3.12, 3.13, and 3.14 on Ubuntu and Windows.
 - ✅ Initial production source list (20 sources: RIA good-news section plus 19 verified RU/EN sources) loaded on the destination host on 2026-07-13.
 - ⏳ Configure real operator credentials on the destination host.
 
