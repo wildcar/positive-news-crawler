@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-15 · News list sorting and evaluation-score filters
+- What: News list now sorts by date or source name and filters by source, selector decision, and all 20 evaluation axes shown at once as dual-threshold 0-10 sliders; added a read-only unmanaged model over `exchange_latest_evaluation_scores` (state-only migration 0005) and 13 tests; verified end-to-end in headless Chromium.
+- Why: Operators need to slice collected news by the evaluator's scores, source, and date.
+- Files: `collector/views.py`, `collector/models.py`, `collector/migrations/0005_latestevaluationscore.py`, `templates/collector/news_list.html`, `templates/base.html`, `tests/test_news_filters.py`, `README.md`, `AGENTS/*`
+- Next: Deploy via `update-ubuntu.sh`; register SQLite client services and create the UI operator on production.
+
 ## 2026-07-14 · Evaluation contract applied on production
 - What: Ran `update-ubuntu.sh` (f8739e7 → c67532c): migrations 0003–0004 applied, 20 characteristics seeded, scores table with triggers and the `exchange_latest_evaluation_scores` view live; services healthy, integrity `ok`.
 - Why: The evaluator service needs the axis set and score storage in the production database, not only in the codebase.

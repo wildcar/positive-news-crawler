@@ -207,6 +207,27 @@ class EvaluationScore(models.Model):
         indexes = [models.Index(fields=["characteristic", "value"], name="idx_eval_axis_value")]
 
 
+class LatestEvaluationScore(models.Model):
+    """Read-only mapping of the exchange_latest_evaluation_scores SQL view.
+
+    The view returns the scores attached to the latest review event per
+    news/selector pair. Rows are unique per (review event, characteristic).
+    Used for operator UI filtering subqueries; never write through it.
+    """
+
+    pk = models.CompositePrimaryKey("review_event_id", "characteristic_key")
+    news_id = models.IntegerField()
+    selector_name = models.CharField(max_length=200)
+    review_event_id = models.IntegerField()
+    created_at = models.DateTimeField()
+    characteristic_key = models.CharField(max_length=64)
+    value = models.PositiveSmallIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = "exchange_latest_evaluation_scores"
+
+
 class OperatorEvent(models.Model):
     event_type = models.CharField(max_length=64, db_index=True)
     source = models.ForeignKey(Source, null=True, blank=True, on_delete=models.SET_NULL, related_name="operator_events")

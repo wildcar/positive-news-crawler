@@ -1,2 +1,129 @@
-{% extends "base.html" %}{% block content %}<h1>Новости</h1><p><a href="?">Все</a> · <a href="?decision=unreviewed">Без оценки</a> · <a href="?decision=positive">Позитивные</a></p><table><tr><th>Дата</th><th>Заголовок</th><th>Язык</th><th>Источников</th></tr>{% for item in items %}<tr><td>{{ item.published_at|default:item.first_seen_at }}</td><td><a href="{% url 'news_detail' item.pk %}">{{ item.title }}</a></td><td>{{ item.language|default:"—" }}</td><td>{{ item.source_count }}</td></tr>{% empty %}<tr><td colspan="4">Новостей нет</td></tr>{% endfor %}</table>{% endblock %}
-
+{% extends "base.html" %}
+{% block head %}
+<style>
+.filter-bar{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end}
+.filter-bar label{display:flex;flex-direction:column;gap:.25rem;font-size:.9rem;color:#61717d}
+.filter-bar select{min-width:11rem}
+.axis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:1rem;margin:.8rem 0}
+.axis-card{background:#f8fafb;border:1px solid #e5eaee;border-radius:8px;padding:.75rem}
+.axis-card h3{margin:.1rem 0 .5rem;font-size:.95rem}
+.axis{display:flex;align-items:center;gap:.7rem;padding:.15rem 0}
+.axis-title{flex:0 0 44%;font-size:.88rem;cursor:help}
+.axis-values{flex:0 0 2.6rem;text-align:right;font-variant-numeric:tabular-nums;font-size:.88rem;color:#61717d}
+.axis-active .axis-title,.axis-active .axis-values{color:#176b87;font-weight:600}
+.axis-range{position:relative;flex:1;height:1.4rem;--lo:0%;--hi:100%}
+.axis-range::before{content:"";position:absolute;left:0;right:0;top:50%;height:4px;transform:translateY(-50%);border-radius:2px;background:linear-gradient(to right,#dce3e8 var(--lo),#2b8aa9 var(--lo),#2b8aa9 var(--hi),#dce3e8 var(--hi))}
+.axis-range input[type=range]{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;background:none;border:0;-webkit-appearance:none;appearance:none;pointer-events:none}
+.axis-range input[type=range]::-webkit-slider-runnable-track{height:1.4rem;background:none;border:0}
+.axis-range input[type=range]::-moz-range-track{height:1.4rem;background:none;border:0}
+.axis-range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:calc((1.4rem - 14px)/2);border-radius:50%;background:#176b87;border:2px solid #fff;box-shadow:0 0 0 1px #176b87;pointer-events:auto;cursor:pointer}
+.axis-range input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;background:#176b87;border:2px solid #fff;box-shadow:0 0 0 1px #176b87;pointer-events:auto;cursor:pointer}
+.axis-range input[type=range]:focus{outline:none}
+.axis-range input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px #9ecbdb}
+.axis-range input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px #9ecbdb}
+</style>
+{% endblock %}
+{% block content %}
+<h1>Новости</h1>
+<form method="get" id="news-filters">
+  <div class="card filter-bar">
+    <label>Сортировка
+      <select name="sort" data-default="date_desc">
+        <option value="date_desc"{% if sort == "date_desc" %} selected{% endif %}>Сначала новые</option>
+        <option value="date_asc"{% if sort == "date_asc" %} selected{% endif %}>Сначала старые</option>
+        <option value="source_asc"{% if sort == "source_asc" %} selected{% endif %}>Источник (А-Я)</option>
+        <option value="source_desc"{% if sort == "source_desc" %} selected{% endif %}>Источник (Я-А)</option>
+      </select>
+    </label>
+    <label>Источник
+      <select name="source" data-default="">
+        <option value="">Все источники</option>
+        {% for candidate in sources %}<option value="{{ candidate.pk }}"{% if candidate.pk == selected_source %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Решение отборщика
+      <select name="decision" data-default="">
+        <option value="">Все</option>
+        <option value="unreviewed"{% if decision == "unreviewed" %} selected{% endif %}>Без оценки</option>
+        <option value="positive"{% if decision == "positive" %} selected{% endif %}>Позитивные</option>
+        <option value="not_positive"{% if decision == "not_positive" %} selected{% endif %}>Не позитивные</option>
+        <option value="skipped"{% if decision == "skipped" %} selected{% endif %}>Пропущенные</option>
+      </select>
+    </label>
+    <button>Применить</button>
+    <a class="button" href="{% url 'news_list' %}">Сбросить</a>
+  </div>
+  <div class="card">
+    <h2>Пороги оценок</h2>
+    <p class="muted">Каждая шкала от 0 до 10, у ползунка два порога: нижний и верхний. Фильтр сравнивает последние оценки новости; если диапазон сужен, новости без оценок в список не попадают.</p>
+    <div class="axis-grid">
+      {% for category, rows in score_groups %}
+      <section class="axis-card">
+        <h3>{{ category }}</h3>
+        {% for row in rows %}
+        <div class="axis{% if row.active %} axis-active{% endif %}">
+          <span class="axis-title" title="{{ row.characteristic.description }}. 0 - {{ row.characteristic.anchor_low }}, 10 - {{ row.characteristic.anchor_high }}.">{{ row.characteristic.title }}</span>
+          <span class="axis-range">
+            <input type="range" name="{{ row.characteristic.key }}_min" min="0" max="10" step="1" value="{{ row.low }}" data-default="0" aria-label="{{ row.characteristic.title }}: нижний порог">
+            <input type="range" name="{{ row.characteristic.key }}_max" min="0" max="10" step="1" value="{{ row.high }}" data-default="10" aria-label="{{ row.characteristic.title }}: верхний порог">
+          </span>
+          <span class="axis-values">{{ row.low }}-{{ row.high }}</span>
+        </div>
+        {% endfor %}
+      </section>
+      {% endfor %}
+    </div>
+    <button>Применить</button>
+  </div>
+</form>
+<p class="muted">Найдено: {{ items|length }}{% if items|length == 200 %} (показаны первые 200){% endif %}</p>
+<table>
+  <tr><th>Дата</th><th>Заголовок</th><th>Язык</th><th>Источник</th></tr>
+  {% for item in items %}
+  <tr>
+    <td>{{ item.display_date }}</td>
+    <td><a href="{% url 'news_detail' item.pk %}">{{ item.title }}</a></td>
+    <td>{{ item.language|default:"—" }}</td>
+    <td>{{ item.primary_source|default:"—" }}{% if item.source_count > 1 %} <span class="pill">+{{ item.source_count|add:"-1" }}</span>{% endif %}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="4">Новостей нет</td></tr>
+  {% endfor %}
+</table>
+<script>
+(function () {
+  var form = document.getElementById("news-filters");
+  form.querySelectorAll(".axis-range").forEach(function (range) {
+    var inputs = range.querySelectorAll("input[type=range]");
+    var low = inputs[0];
+    var high = inputs[1];
+    var axis = range.closest(".axis");
+    var badge = axis.querySelector(".axis-values");
+    function sync(moved) {
+      var lo = +low.value;
+      var hi = +high.value;
+      if (lo > hi) {
+        if (moved === low) { low.value = hi; lo = hi; } else { high.value = lo; hi = lo; }
+      }
+      range.style.setProperty("--lo", lo * 10 + "%");
+      range.style.setProperty("--hi", hi * 10 + "%");
+      badge.textContent = lo + "-" + hi;
+      axis.classList.toggle("axis-active", lo > 0 || hi < 10);
+      // When both thumbs meet at the top half, lift the lower input so the
+      // pair never deadlocks at either end of the scale.
+      low.style.zIndex = (lo === hi && lo > 5) ? 3 : 1;
+      high.style.zIndex = 2;
+    }
+    low.addEventListener("input", function () { sync(low); });
+    high.addEventListener("input", function () { sync(high); });
+    sync();
+  });
+  // Fields left at their defaults are disabled on submit to keep URLs short.
+  form.addEventListener("submit", function () {
+    form.querySelectorAll("[data-default]").forEach(function (field) {
+      if (field.value === field.dataset.default) { field.disabled = true; }
+    });
+  });
+})();
+</script>
+{% endblock %}

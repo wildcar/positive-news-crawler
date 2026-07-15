@@ -71,6 +71,7 @@ External selector <- exchange views -> append-only review events-+
 ### Operator and operation
 
 - ✅ Single local operator account; authenticated dashboard, source editor, news/duplicate view, crawl runs, events, source statistics, backup status.
+- ✅ News list sorting by date or by source name (both directions) and filtering by source, review decision, and evaluation scores: all 20 characteristics are shown at once as dual-threshold 0–10 range sliders; every active range must match the latest evaluation of the news item (via `exchange_latest_evaluation_scores`), so any tightened range excludes news without scores.
 - ✅ CLI commands for operator creation, worker, and maintenance.
 - ✅ Windows/Ubuntu install and service files, structured rotating logs, CI matrix.
 - ✅ Reproducible Ubuntu production layout, shared local SQLite group access, and guarded fast-forward update with backup/rollback.

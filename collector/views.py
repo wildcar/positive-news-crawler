@@ -1,11 +1,39 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Exists, Min, OuterRef
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import SourceForm
-from .models import CrawlRun, NewsItem, OperatorEvent, ReviewEvent, Source
+from .models import (
+    CrawlRun,
+    EvaluationCharacteristic,
+    LatestEvaluationScore,
+    NewsItem,
+    OperatorEvent,
+    ReviewEvent,
+    Source,
+)
+
+SCORE_MIN = 0
+SCORE_MAX = 10
+
+NEWS_SORT_ORDERS = {
+    "date_desc": ("-display_date", "-id"),
+    "date_asc": ("display_date", "id"),
+    "source_asc": ("primary_source", "-display_date"),
+    "source_desc": ("-primary_source", "-display_date"),
+}
+
+
+def _score_bound(raw, default):
+    """Parse a slider threshold; fall back to the default and clamp to 0..10."""
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return default
+    return max(SCORE_MIN, min(SCORE_MAX, value))
 
 
 @login_required
@@ -74,13 +102,59 @@ def source_resume(request, pk):
 
 @login_required
 def news_list(request):
-    items = NewsItem.objects.prefetch_related("occurrences__source").annotate(source_count=Count("occurrences__source", distinct=True))
-    decision = request.GET.get("decision")
+    items = NewsItem.objects.prefetch_related("occurrences__source").annotate(
+        source_count=Count("occurrences__source", distinct=True),
+        display_date=Coalesce("published_at", "first_seen_at"),
+        primary_source=Min("occurrences__source__name"),
+    )
+
+    decision = request.GET.get("decision", "")
     if decision == "unreviewed":
         items = items.filter(review_events__isnull=True)
     elif decision:
         items = items.filter(review_events__decision=decision)
-    return render(request, "collector/news_list.html", {"items": items[:200], "decision": decision})
+
+    raw_source = request.GET.get("source", "")
+    selected_source = int(raw_source) if raw_source.isdigit() else None
+    if selected_source is not None:
+        items = items.filter(occurrences__source_id=selected_source)
+
+    # Every characteristic renders as a dual-threshold slider; only ranges
+    # narrower than 0..10 filter. A narrowed range requires a matching row in
+    # the latest evaluation of the news item, so unevaluated news drops out.
+    score_groups: dict[str, list[dict]] = {}
+    for characteristic in EvaluationCharacteristic.objects.all():
+        low = _score_bound(request.GET.get(f"{characteristic.key}_min"), SCORE_MIN)
+        high = _score_bound(request.GET.get(f"{characteristic.key}_max"), SCORE_MAX)
+        if low > high:
+            low, high = high, low
+        active = (low, high) != (SCORE_MIN, SCORE_MAX)
+        if active:
+            latest_scores = LatestEvaluationScore.objects.filter(
+                news_id=OuterRef("pk"),
+                characteristic_key=characteristic.key,
+                value__gte=low,
+                value__lte=high,
+            )
+            items = items.filter(Exists(latest_scores))
+        score_groups.setdefault(characteristic.category, []).append(
+            {"characteristic": characteristic, "low": low, "high": high, "active": active}
+        )
+
+    sort = request.GET.get("sort", "date_desc")
+    if sort not in NEWS_SORT_ORDERS:
+        sort = "date_desc"
+    items = items.order_by(*NEWS_SORT_ORDERS[sort])
+
+    context = {
+        "items": items[:200],
+        "decision": decision,
+        "sort": sort,
+        "sources": Source.objects.order_by("name"),
+        "selected_source": selected_source,
+        "score_groups": list(score_groups.items()),
+    }
+    return render(request, "collector/news_list.html", context)
 
 
 @login_required
