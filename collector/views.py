@@ -160,7 +160,24 @@ def news_list(request):
 @login_required
 def news_detail(request, pk):
     item = get_object_or_404(NewsItem.objects.prefetch_related("occurrences__source", "review_events"), pk=pk)
-    return render(request, "collector/news_detail.html", {"item": item})
+    characteristics = {c.key: c for c in EvaluationCharacteristic.objects.all()}
+    evaluations: dict[str, dict] = {}
+    for row in LatestEvaluationScore.objects.filter(news_id=item.pk):
+        characteristic = characteristics.get(row.characteristic_key)
+        if characteristic is None:
+            continue
+        entry = evaluations.setdefault(
+            row.selector_name,
+            {"selector_name": row.selector_name, "created_at": row.created_at, "scores": []},
+        )
+        entry["scores"].append({"characteristic": characteristic, "value": row.value})
+    for entry in evaluations.values():
+        entry["scores"].sort(key=lambda score: score["characteristic"].position)
+    context = {
+        "item": item,
+        "evaluations": sorted(evaluations.values(), key=lambda entry: entry["selector_name"]),
+    }
+    return render(request, "collector/news_detail.html", context)
 
 
 @login_required

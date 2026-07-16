@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-16 · Evaluation heat scale on the news detail page
+- What: News detail now shows «Баллы по характеристикам» — the latest evaluation per selector as a category-grouped heat scale (11-step single-hue ramp with computed monotone lightness and ≥ 4.5:1 per-cell text contrast, 0-10 legend, anchor tooltips); shared test fixtures extracted to `tests/conftest.py`, 5 new tests, headless-Chromium render check.
+- Why: Operators need to read the evaluator's detailed axis scores at a glance without querying SQLite.
+- Files: `collector/views.py`, `templates/collector/news_detail.html`, `tests/conftest.py`, `tests/test_news_detail.py`, `tests/test_news_filters.py`, `README.md`, `AGENTS/*`
+- Next: Deploy via `update-ubuntu.sh`; register SQLite client services and create the UI operator on production.
+
 ## 2026-07-15 · News list sorting and evaluation-score filters
 - What: News list now sorts by date or source name and filters by source, selector decision, and all 20 evaluation axes shown at once as dual-threshold 0-10 sliders; added a read-only unmanaged model over `exchange_latest_evaluation_scores` (state-only migration 0005) and 13 tests; verified end-to-end in headless Chromium.
 - Why: Operators need to slice collected news by the evaluator's scores, source, and date.
