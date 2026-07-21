@@ -16,16 +16,16 @@ Operate a single-host multilingual news crawler whose source list improves from 
 - News detail now has a model-backed Russian translation action. It saves the translated title, full text, short summary, actual model identifier, and generation time. Router address, token, provider, model, tier, temperature, token limit, and timeout are environment settings; the default model hint matches the evaluator's `deepseek-chat`.
 - News detail now has an idempotent operator «Отобрано» action. It creates an append-only positive review and snapshots the configured evaluator's latest scores; occurrences retain source URLs for future weight fitting.
 - Retention deletes stored translations when it purges the original full text after 90 days.
-- Production runs commit `a354bc9`; migration `0006_newstranslation` is applied, `news_translations` exists, web/worker/model-router services are active, HTTPS returns 200, and SQLite integrity is `ok`.
+- Production runs commit `e471193`; migration `0006_newstranslation` is applied, `news_translations` exists, web/worker/model-router services are active, HTTPS returns 200, and SQLite integrity is `ok`.
 - The production crawler environment contains `NEWSCRAWLER_ROUTER_AUTH_TOKEN`; web was restarted and its loaded token matches the router process without exposing either value.
 - Production translation smoke test passed for news 5364 with `deepseek-chat`; the Russian body and summary were persisted.
-- A production failure on news 760 exposed invalid JSON from unescaped quotes in model prose. The development branch now uses marker-delimited translation sections with one correction retry; deployment is pending.
+- A production failure on news 760 exposed invalid JSON from unescaped quotes in model prose. Marker-delimited translation sections with one correction retry are deployed; news 760 translated and persisted successfully after the update.
 - Verified on Ubuntu/Python 3.12: Django checks clean, migrations match models, and all 46 tests pass.
 - Agent-authored Russian text follows `.claude/skills/humanizer-ru/SKILL.md`; collected article content stays verbatim.
 
 ## Next
 
-- Deploy the marker-delimited translation response format and retry news 760.
+- Watch live translation errors; malformed model formatting now gets one automatic correction attempt.
 - Register every local SQLite client service in `/etc/newscrawler/update-services` and create the UI operator if still pending.
 - Watch crawl runs and positive-yield statistics; tune per-site rules where extraction fails.
 

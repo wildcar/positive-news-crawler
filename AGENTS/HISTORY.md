@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-21 · Robust translation deployed
+- What: Deployed `e471193`, verified all services/HTTPS/SQLite, and successfully translated the previously failing news 760 with marked response sections.
+- Why: Confirm the invalid-JSON failure is fixed against the same production article.
+- Files: production host; backup `pre-update-20260721T150005Z.sqlite3`
+- Next: Watch for provider failures; format errors now receive one automatic correction attempt.
+
 ## 2026-07-21 · Robust translation response format
 - What: Replaced long free-text JSON replies with marked title/summary/body sections and one format-correction retry; added regression coverage for quotes and malformed first replies.
 - Why: DeepSeek twice returned invalid JSON for news 760 because a quote inside translated prose was not escaped.
