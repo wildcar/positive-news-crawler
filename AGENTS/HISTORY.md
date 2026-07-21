@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-21 · Translation feature deployed
+- What: Updated production to `a354bc9`, applied migration 0006, restarted web/worker, and verified HTTPS, SQLite integrity, translation table, and all three relevant services.
+- Why: Make news translation and manual score-labelled selection available in the live operator UI.
+- Files: production host; backup `pre-update-20260721T144230Z.sqlite3`
+- Next: Add `NEWSCRAWLER_ROUTER_AUTH_TOKEN` to the protected production environment and smoke-test one translation.
+
 ## 2026-07-21 · Translation and manual selection on news detail
 - What: Added persisted Russian translation and summary through configurable model-router-mcp, plus idempotent operator selection that snapshots the latest evaluator scores and retains links through the news relation; retention removes translated full text with the source article.
 - Why: Operators need to read foreign news in Russian and collect labelled score vectors for later selection-weight fitting.
