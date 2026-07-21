@@ -14,11 +14,13 @@ Host facts, tools, credentials pointers, and command cheat-sheet for this projec
 - Django 5.2 LTS, SQLite from the selected Python runtime.
 - Playwright Chromium installed by `python -m playwright install chromium`.
 - Git is optional until the target directory is initialized and a remote is configured.
+- The production `model-router-mcp` endpoint is local at `http://127.0.0.1:8088/mcp`; news translation uses its `chat` tool.
 
 ## Credentials & secrets
 
 - Runtime values come from `NEWSCRAWLER_*` environment variables; template: `.env.example`.
 - Never store the Django secret key, operator password, or site credentials in the repository.
+- The router token is `AUTH_TOKEN` in `/opt/model-router-mcp/.env`; copy its value to `NEWSCRAWLER_ROUTER_AUTH_TOKEN` in the protected crawler environment file, never to Git.
 - `.env`, `data/*.sqlite3`, backups, logs, and lock files are gitignored.
 
 ## Environments

@@ -1,6 +1,6 @@
 [Unit]
 Description=Positive News Crawler web UI
-After=network.target
+After=network.target model-router-mcp.service
 ConditionPathExists=/etc/newscrawler/newscrawler.env
 ConditionPathExists=/var/lib/newscrawler/newscrawler.sqlite3
 ConditionPathIsDirectory=/var/lib/newscrawler

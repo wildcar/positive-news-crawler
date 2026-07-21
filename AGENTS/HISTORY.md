@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-21 · Translation and manual selection on news detail
+- What: Added persisted Russian translation and summary through configurable model-router-mcp, plus idempotent operator selection that snapshots the latest evaluator scores and retains links through the news relation; retention removes translated full text with the source article.
+- Why: Operators need to read foreign news in Russian and collect labelled score vectors for later selection-weight fitting.
+- Files: `collector/{models,views,services,migrations}`, `templates/collector/news_detail.html`, settings/env/deployment docs, tests, `AGENTS/*`
+- Next: Deploy migration 0006 and set the router token/model in `/etc/newscrawler/newscrawler.env`.
+
 ## 2026-07-16 · Evaluation heat scale on the news detail page
 - What: News detail now shows «Баллы по характеристикам» — the latest evaluation per selector as a category-grouped heat scale (11-step single-hue ramp with computed monotone lightness and ≥ 4.5:1 per-cell text contrast, 0-10 legend, anchor tooltips); shared test fixtures extracted to `tests/conftest.py`, 5 new tests, headless-Chromium render check.
 - Why: Operators need to read the evaluator's detailed axis scores at a glance without querying SQLite.

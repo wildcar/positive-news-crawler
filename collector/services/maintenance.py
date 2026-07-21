@@ -9,7 +9,7 @@ from django.db import connection, transaction
 from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
-from collector.models import DiscoveryDomain, NewsItem, OperatorEvent, ReviewEvent, Source, SourceEndpoint
+from collector.models import DiscoveryDomain, NewsItem, NewsTranslation, OperatorEvent, ReviewEvent, Source, SourceEndpoint
 from .fetch import allowed_by_robots, discover_endpoints, fetch_url
 
 logger = logging.getLogger(__name__)
@@ -105,7 +105,12 @@ def _probe_domain(probe):
 def purge_old_content(days=90):
     cutoff = timezone.now() - timedelta(days=days)
     items = NewsItem.objects.filter(first_seen_at__lt=cutoff, purged_at__isnull=True)
-    count = items.update(title="[purged]", body_text="", author="", metadata={}, purged_at=timezone.now())
+    item_ids = list(items.values_list("id", flat=True))
+    with transaction.atomic():
+        NewsTranslation.objects.filter(news_item_id__in=item_ids).delete()
+        count = NewsItem.objects.filter(id__in=item_ids).update(
+            title="[purged]", body_text="", author="", metadata={}, purged_at=timezone.now()
+        )
     if count:
         OperatorEvent.objects.create(event_type="retention", message=f"Удалено содержимое {count} старых новостей", details={"days": days})
     return count

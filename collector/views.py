@@ -1,9 +1,12 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Exists, Min, OuterRef
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from .forms import SourceForm
 from .models import (
@@ -15,6 +18,9 @@ from .models import (
     ReviewEvent,
     Source,
 )
+from .services.manual_review import mark_selected
+from .services.model_router import ModelRouterError
+from .services.translation import TranslationError, translate_news
 
 SCORE_MIN = 0
 SCORE_MAX = 10
@@ -25,6 +31,8 @@ NEWS_SORT_ORDERS = {
     "source_asc": ("primary_source", "-display_date"),
     "source_desc": ("-primary_source", "-display_date"),
 }
+
+logger = logging.getLogger(__name__)
 
 
 def _score_bound(raw, default):
@@ -176,8 +184,44 @@ def news_detail(request, pk):
     context = {
         "item": item,
         "evaluations": sorted(evaluations.values(), key=lambda entry: entry["selector_name"]),
+        "translation": getattr(item, "russian_translation", None),
+        "manual_selected": item.review_events.filter(
+            selector_name=f"operator:{request.user.get_username()}"[:200],
+            idempotency_key=f"selected:{item.pk}",
+        ).exists(),
     }
     return render(request, "collector/news_detail.html", context)
+
+
+@login_required
+@require_POST
+def news_translate(request, pk):
+    item = get_object_or_404(NewsItem, pk=pk)
+    if not item.body_text.strip():
+        messages.error(request, "Текст новости уже удалён, перевести его нельзя.")
+    else:
+        try:
+            translate_news(item)
+        except (ModelRouterError, TranslationError):
+            logger.exception("Translation failed for news %s", item.pk)
+            messages.error(request, "Не удалось получить перевод от модели. Подробности записаны в журнал сервера.")
+        else:
+            messages.success(request, "Перевод и краткий пересказ готовы.")
+    return redirect("news_detail", pk=pk)
+
+
+@login_required
+@require_POST
+def news_select(request, pk):
+    item = get_object_or_404(NewsItem, pk=pk)
+    _, created, score_count = mark_selected(item, request.user.get_username())
+    if not created:
+        messages.success(request, "Новость уже отмечена как отобранная.")
+    elif score_count:
+        messages.success(request, f"Новость отобрана. Сохранено баллов: {score_count}.")
+    else:
+        messages.success(request, "Новость отобрана. У неё пока нет баллов автоматической оценки.")
+    return redirect("news_detail", pk=pk)
 
 
 @login_required
@@ -188,4 +232,3 @@ def run_list(request):
 @login_required
 def event_list(request):
     return render(request, "collector/event_list.html", {"events": OperatorEvent.objects.select_related("source")[:300]})
-

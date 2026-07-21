@@ -5,7 +5,7 @@ import pytest
 from django.test import override_settings
 from django.utils import timezone
 
-from collector.models import OperatorEvent, ReviewEvent, Source
+from collector.models import NewsTranslation, OperatorEvent, ReviewEvent, Source
 from collector.services.ingest import ingest_article
 from collector.services.maintenance import create_backup, evaluate_sources, purge_old_content
 
@@ -38,11 +38,18 @@ def test_retention_keeps_tombstone():
     source = Source.objects.create(name="Old", base_url="https://old.example/", domain="old.example")
     item, _, _ = ingest_article(source=source, url="https://old.example/1", title="Old news", body="Old news body. " * 30)
     type(item).objects.filter(pk=item.pk).update(first_seen_at=timezone.now() - timedelta(days=91))
+    NewsTranslation.objects.create(
+        news_item=item,
+        title="Старый перевод",
+        body_text="Старый полный текст",
+        summary="Старый пересказ",
+    )
     assert purge_old_content() == 1
     item.refresh_from_db()
     assert item.body_text == ""
     assert item.purged_at is not None
     assert item.occurrences.exists()
+    assert not NewsTranslation.objects.filter(news_item=item).exists()
 
 
 @pytest.mark.django_db

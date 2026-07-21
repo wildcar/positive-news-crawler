@@ -113,6 +113,8 @@ sudoedit /etc/newscrawler/newscrawler.env
 - email в `NEWSCRAWLER_USER_AGENT` — действующий технический контакт;
 - `NEWSCRAWLER_SECURE=1` — только после настройки HTTPS.
 
+Для перевода новостей укажите `NEWSCRAWLER_ROUTER_AUTH_TOKEN`. Это `AUTH_TOKEN` из конфигурации локального `model-router-mcp`. Модель задаёт `NEWSCRAWLER_TRANSLATION_MODEL`; шаблон использует `deepseek-chat`, как и News Evaluator. Токен остаётся только в `/etc/newscrawler/newscrawler.env` с правами `0640`.
+
 Строки файла должны оставаться совместимыми с форматом shell `KEY=value`; значения с пробелами заключайте в двойные кавычки. Пути production менять без необходимости не следует:
 
 ```text

@@ -129,6 +129,18 @@ class NewsOccurrence(models.Model):
         indexes = [models.Index(fields=["source", "-fetched_at"], name="idx_occ_source_time")]
 
 
+class NewsTranslation(models.Model):
+    news_item = models.OneToOneField(NewsItem, on_delete=models.CASCADE, related_name="russian_translation")
+    title = models.TextField()
+    body_text = models.TextField()
+    summary = models.TextField()
+    model_id = models.CharField(max_length=200, blank=True)
+    generated_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        db_table = "news_translations"
+
+
 class OutboundLink(models.Model):
     occurrence = models.ForeignKey(NewsOccurrence, on_delete=models.CASCADE, related_name="outbound_links")
     url = models.URLField(max_length=3000)
@@ -252,4 +264,3 @@ class DiscoveryDomain(models.Model):
     class Meta:
         db_table = "discovery_domains"
         constraints = [models.UniqueConstraint(fields=["review_event", "domain"], name="uq_discovery_review_domain")]
-
