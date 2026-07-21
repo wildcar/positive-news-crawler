@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-21 · Robust translation response format
+- What: Replaced long free-text JSON replies with marked title/summary/body sections and one format-correction retry; added regression coverage for quotes and malformed first replies.
+- Why: DeepSeek twice returned invalid JSON for news 760 because a quote inside translated prose was not escaped.
+- Files: `collector/services/translation.py`, `tests/test_news_actions.py`, `AGENTS/*`
+- Next: Deploy and retry production news 760.
+
 ## 2026-07-21 · Production translation smoke test
 - What: Diagnosed HTTP 401: the protected env file had the correct router token, but the running web process predated the edit; restarted web, confirmed process tokens match, and translated news 5364 with `deepseek-chat`.
 - Why: The live translation button failed until Waitress reloaded its environment.

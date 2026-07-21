@@ -44,7 +44,12 @@ def test_translation_service_sends_configured_model(monkeypatch, settings, sourc
     def fake_chat(**kwargs):
         captured.update(kwargs)
         return {
-            "text": '{"title":"Заголовок","body_text":"Перевод","summary":"Пересказ"}',
+            "text": (
+                "<<<TITLE>>>\nЗаголовок\n"
+                "<<<SUMMARY>>>\nПересказ\n"
+                "<<<BODY>>>\nПеревод с кавычкой «пример».\n"
+                "<<<END>>>"
+            ),
             "model_id": "actual-model",
         }
 
@@ -54,6 +59,38 @@ def test_translation_service_sends_configured_model(monkeypatch, settings, sourc
     assert captured["provider"] == "configured-provider"
     assert captured["model_id"] == "configured-model"
     assert translation.model_id == "actual-model"
+    assert translation.body_text == "Перевод с кавычкой «пример»."
+
+
+@pytest.mark.django_db
+def test_translation_service_retries_invalid_format(monkeypatch, source, make_news):
+    item = make_news("Original title", source, day=10, seed="service-retry")
+    replies = iter(
+        [
+            {"text": "broken response", "model_id": "deepseek-chat"},
+            {
+                "text": (
+                    "<<<TITLE>>>\nЗаголовок\n"
+                    "<<<SUMMARY>>>\nПересказ\n"
+                    "<<<BODY>>>\nИсправленный перевод.\n"
+                    "<<<END>>>"
+                ),
+                "model_id": "deepseek-chat",
+            },
+        ]
+    )
+    calls = []
+
+    def fake_chat(**kwargs):
+        calls.append(kwargs)
+        return next(replies)
+
+    monkeypatch.setattr("collector.services.translation.call_chat", fake_chat)
+    translation = translate_news(item)
+
+    assert len(calls) == 2
+    assert "format was invalid" in calls[1]["messages"][-1]["content"]
+    assert translation.body_text == "Исправленный перевод."
 
 
 @pytest.mark.django_db

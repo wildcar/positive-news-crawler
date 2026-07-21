@@ -19,12 +19,13 @@ Operate a single-host multilingual news crawler whose source list improves from 
 - Production runs commit `a354bc9`; migration `0006_newstranslation` is applied, `news_translations` exists, web/worker/model-router services are active, HTTPS returns 200, and SQLite integrity is `ok`.
 - The production crawler environment contains `NEWSCRAWLER_ROUTER_AUTH_TOKEN`; web was restarted and its loaded token matches the router process without exposing either value.
 - Production translation smoke test passed for news 5364 with `deepseek-chat`; the Russian body and summary were persisted.
-- Verified on Ubuntu/Python 3.12: Django checks clean, migrations match models, and all 45 tests pass.
+- A production failure on news 760 exposed invalid JSON from unescaped quotes in model prose. The development branch now uses marker-delimited translation sections with one correction retry; deployment is pending.
+- Verified on Ubuntu/Python 3.12: Django checks clean, migrations match models, and all 46 tests pass.
 - Agent-authored Russian text follows `.claude/skills/humanizer-ru/SKILL.md`; collected article content stays verbatim.
 
 ## Next
 
-- Use translation through the live operator UI and watch model errors in the web journal.
+- Deploy the marker-delimited translation response format and retry news 760.
 - Register every local SQLite client service in `/etc/newscrawler/update-services` and create the UI operator if still pending.
 - Watch crawl runs and positive-yield statistics; tune per-site rules where extraction fails.
 
