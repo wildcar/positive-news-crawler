@@ -17,13 +17,14 @@ Operate a single-host multilingual news crawler whose source list improves from 
 - News detail now has an idempotent operator «Отобрано» action. It creates an append-only positive review and snapshots the configured evaluator's latest scores; occurrences retain source URLs for future weight fitting.
 - Retention deletes stored translations when it purges the original full text after 90 days.
 - Production runs commit `a354bc9`; migration `0006_newstranslation` is applied, `news_translations` exists, web/worker/model-router services are active, HTTPS returns 200, and SQLite integrity is `ok`.
-- The production crawler environment does not yet contain `NEWSCRAWLER_ROUTER_AUTH_TOKEN`; translation requests will fail until the router token is copied and the web service restarted.
+- The production crawler environment contains `NEWSCRAWLER_ROUTER_AUTH_TOKEN`; web was restarted and its loaded token matches the router process without exposing either value.
+- Production translation smoke test passed for news 5364 with `deepseek-chat`; the Russian body and summary were persisted.
 - Verified on Ubuntu/Python 3.12: Django checks clean, migrations match models, and all 45 tests pass.
 - Agent-authored Russian text follows `.claude/skills/humanizer-ru/SKILL.md`; collected article content stays verbatim.
 
 ## Next
 
-- Add `NEWSCRAWLER_ROUTER_AUTH_TOKEN` to `/etc/newscrawler/newscrawler.env`, restart the web service, then smoke-test translation through the live operator UI.
+- Use translation through the live operator UI and watch model errors in the web journal.
 - Register every local SQLite client service in `/etc/newscrawler/update-services` and create the UI operator if still pending.
 - Watch crawl runs and positive-yield statistics; tune per-site rules where extraction fails.
 

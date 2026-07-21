@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-21 · Production translation smoke test
+- What: Diagnosed HTTP 401: the protected env file had the correct router token, but the running web process predated the edit; restarted web, confirmed process tokens match, and translated news 5364 with `deepseek-chat`.
+- Why: The live translation button failed until Waitress reloaded its environment.
+- Files: production configuration and database only; no secret values recorded
+- Next: Use the operator UI normally and watch model errors in the web journal.
+
 ## 2026-07-21 · Translation feature deployed
 - What: Updated production to `a354bc9`, applied migration 0006, restarted web/worker, and verified HTTPS, SQLite integrity, translation table, and all three relevant services.
 - Why: Make news translation and manual score-labelled selection available in the live operator UI.
