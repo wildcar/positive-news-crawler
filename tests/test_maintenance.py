@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from collector.models import NewsTranslation, OperatorEvent, ReviewEvent, Source
 from collector.services.ingest import ingest_article
-from collector.services.maintenance import create_backup, evaluate_sources, purge_old_content
+from collector.services.maintenance import create_backup, evaluate_sources, purge_old_content, purge_rejected_content
 
 
 @pytest.mark.django_db
@@ -50,6 +50,31 @@ def test_retention_keeps_tombstone():
     assert item.purged_at is not None
     assert item.occurrences.exists()
     assert not NewsTranslation.objects.filter(news_item=item).exists()
+
+
+@pytest.mark.django_db
+def test_rejected_news_purged_after_three_days():
+    source = Source.objects.create(name="Rej", base_url="https://rej.example/", domain="rej.example")
+
+    def add(url, days_old, decisions):
+        item, _, _ = ingest_article(source=source, url=url, title=f"News {url}", body=(f"Body about {url} number. " * 30))
+        type(item).objects.filter(pk=item.pk).update(first_seen_at=timezone.now() - timedelta(days=days_old))
+        for i, decision in enumerate(decisions):
+            ReviewEvent.objects.create(news_item=item, decision=decision, selector_name="news-evaluator", idempotency_key=f"{url}:{i}")
+        return item
+
+    rejected = add("https://rej.example/old-rejected", 4, ["not_positive"])
+    selected = add("https://rej.example/old-selected", 4, ["not_positive", "positive"])
+    skipped = add("https://rej.example/old-skipped", 4, ["skipped"])
+    fresh_rejected = add("https://rej.example/fresh-rejected", 1, ["not_positive"])
+    unreviewed = add("https://rej.example/old-unreviewed", 4, [])
+
+    assert purge_rejected_content() == 1  # only the old item with a not_positive and no positive
+
+    for item, purged in [(rejected, True), (selected, False), (skipped, False), (fresh_rejected, False), (unreviewed, False)]:
+        item.refresh_from_db()
+        assert (item.purged_at is not None) is purged, item.occurrences.first().url
+    assert OperatorEvent.objects.filter(event_type="retention_rejected").exists()
 
 
 @pytest.mark.django_db

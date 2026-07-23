@@ -20,11 +20,13 @@ Operate a single-host multilingual news crawler whose source list improves from 
 - The production crawler environment contains `NEWSCRAWLER_ROUTER_AUTH_TOKEN`; web was restarted and its loaded token matches the router process without exposing either value.
 - Production translation smoke test passed for news 5364 with `deepseek-chat`; the Russian body and summary were persisted.
 - A production failure on news 760 exposed invalid JSON from unescaped quotes in model prose. Marker-delimited translation sections with one correction retry are deployed; news 760 translated and persisted successfully after the update.
-- Verified on Ubuntu/Python 3.12: Django checks clean, migrations match models, and all 46 tests pass.
+- Verified on Ubuntu/Python 3.12: Django checks clean, migrations match models, and all 47 tests pass.
 - Agent-authored Russian text follows `.claude/skills/humanizer-ru/SKILL.md`; collected article content stays verbatim.
+- Retention: `purge_rejected_content(days=3)` tombstones news with a `not_positive` verdict and no `positive` one (skipped/undecided/never-reviewed/selected are kept), wired into `maintenance`. Committed, not yet deployed. The external evaluator's backfill already ran on prod (latest reviews: 120 positive, 6108 not_positive), so the first prod run will tombstone ~4230 rejected items older than 3 days.
 
 ## Next
 
+- Deploy the rejected-news retention; expect the first maintenance run to tombstone ~4230 items.
 - Watch live translation errors; malformed model formatting now gets one automatic correction attempt.
 - Register every local SQLite client service in `/etc/newscrawler/update-services` and create the UI operator if still pending.
 - Watch crawl runs and positive-yield statistics; tune per-site rules where extraction fails.

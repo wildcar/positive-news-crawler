@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-23 · Retention for rejected news
+- What: `purge_rejected_content(days=3)` tombstones news with a `not_positive` verdict and no `positive` one after 3 days (content blanked, row and append-only events kept), wired into the `maintenance` command; +1 test.
+- Why: Evaluator now assigns verdicts; drop rejected news so only selected/undecided items linger (owner request).
+- Files: collector/services/maintenance.py, collector/management/commands/maintenance.py, tests/test_maintenance.py, AGENTS/SPEC.md
+- Next: Deploy; first prod run will tombstone ~4230 already-rejected items (backfill already ran, 120 positive / 6108 not_positive).
+
 ## 2026-07-21 · Robust translation deployed
 - What: Deployed `e471193`, verified all services/HTTPS/SQLite, and successfully translated the previously failing news 760 with marked response sections.
 - Why: Confirm the invalid-JSON failure is fixed against the same production article.

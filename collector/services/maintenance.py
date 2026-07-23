@@ -116,6 +116,34 @@ def purge_old_content(days=90):
     return count
 
 
+def purge_rejected_content(days=3):
+    """Tombstone news a selector explicitly rejected, once it is old enough.
+
+    "Rejected" means the item has at least one `not_positive` verdict and no
+    `positive` one (from any selector, including the manual operator). `skipped`
+    (undecided) and never-reviewed items are left alone, so purging is safe to run
+    before the evaluator has assigned verdicts and an outage cannot silently drop
+    the queue. Review events are append-only (contract), so we purge content and
+    keep the row and its events as a tombstone, exactly like `purge_old_content`.
+    """
+    cutoff = timezone.now() - timedelta(days=days)
+    items = (
+        NewsItem.objects.filter(first_seen_at__lt=cutoff, purged_at__isnull=True)
+        .filter(review_events__decision=ReviewEvent.Decision.NOT_POSITIVE)
+        .exclude(review_events__decision=ReviewEvent.Decision.POSITIVE)
+        .distinct()
+    )
+    item_ids = list(items.values_list("id", flat=True))
+    with transaction.atomic():
+        NewsTranslation.objects.filter(news_item_id__in=item_ids).delete()
+        count = NewsItem.objects.filter(id__in=item_ids).update(
+            title="[rejected]", body_text="", author="", metadata={}, purged_at=timezone.now()
+        )
+    if count:
+        OperatorEvent.objects.create(event_type="retention_rejected", message=f"Удалено содержимое {count} отклоненных новостей", details={"days": days})
+    return count
+
+
 def create_backup(keep=7):
     backup_dir = settings.NEWSCRAWLER_BACKUP_DIR
     backup_dir.mkdir(parents=True, exist_ok=True)
