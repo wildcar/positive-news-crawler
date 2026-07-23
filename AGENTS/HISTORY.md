@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-23 · Two constructive-journalism sources added
+- What: Added Fix the News (`fixthenews.com/feed/`) and YES! Magazine (`yesmagazine.org/feed`) as active RSS sources on prod (verified 200/RSS/fresh/robots/same-domain links).
+- Why: Operator request to add reputable constructive/solutions-journalism outlets.
+- Files: production DB only (no code change).
+- Next: Skipped BBC (no positive-only feed), CBS Uplift (video pages, thin text), Happy Broadcast (no RSS), SJN/VK/Reddit (not crawlable article feeds).
+
 ## 2026-07-23 · Retention for rejected news
 - What: `purge_rejected_content(days=3)` tombstones news with a `not_positive` verdict and no `positive` one after 3 days (content blanked, row and append-only events kept), wired into the `maintenance` command; +1 test.
 - Why: Evaluator now assigns verdicts; drop rejected news so only selected/undecided items linger (owner request).
