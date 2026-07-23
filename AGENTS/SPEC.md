@@ -63,7 +63,7 @@ External selector <- exchange views -> append-only review events-+
 
 ### Source policy
 
-- ✅ Discover candidate domains only from external links of positively reviewed items.
+- ✅ Discover candidate domains only from external links of positively reviewed items, excluding a blocklist of social networks, messengers, video platforms, app stores, and link shorteners.
 - ✅ Automatically accepted sources enter probation, limited to 20 saved articles.
 - ✅ Promote after at least ten final reviews, at least 80% extraction success, and positive yield of at least 2%.
 - ✅ Pause an active source below 2% yield after at least 50 final reviews in a rolling 30-day window.

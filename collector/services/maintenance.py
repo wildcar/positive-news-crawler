@@ -15,6 +15,40 @@ from .fetch import allowed_by_robots, discover_endpoints, fetch_url
 logger = logging.getLogger(__name__)
 
 
+# Domains that are never useful as crawl sources: social networks, messengers,
+# video platforms, app stores, and link shorteners. Positive articles routinely
+# carry share/app links to these, and auto-discovery kept turning them into dead
+# probation sources. Entries match the domain itself and any subdomain, so
+# "viber.com" also blocks "invite.viber.com"; use specific store subdomains
+# (apps.apple.com) so the parent brand (apple.com) stays allowed.
+BLOCKED_DISCOVERY_DOMAINS = frozenset({
+    # social networks
+    "vk.com", "vk.ru", "ok.ru", "odnoklassniki.ru", "facebook.com", "fb.com",
+    "instagram.com", "twitter.com", "x.com", "tiktok.com", "pinterest.com",
+    "linkedin.com", "reddit.com", "tumblr.com", "dzen.ru", "livejournal.com",
+    # messengers
+    "t.me", "telegram.me", "telegram.org", "tgclick.com", "viber.com",
+    "whatsapp.com", "wa.me", "max.ru",
+    # video / streaming
+    "youtube.com", "youtu.be", "rutube.ru", "vimeo.com", "twitch.tv",
+    "dailymotion.com",
+    # app stores
+    "apps.apple.com", "play.google.com", "appgallery.huawei.com", "rustore.ru",
+    "galaxystore.samsung.com", "apps.rustore.ru",
+    # link shorteners
+    "bit.ly", "goo.gl", "t.co", "tinyurl.com", "cutt.ly", "clck.ru",
+})
+
+
+def is_blocked_discovery_domain(domain: str) -> bool:
+    """True when a domain is on the discovery blocklist (self or any subdomain)."""
+    normalized = (domain or "").lower().strip(".")
+    return any(
+        normalized == blocked or normalized.endswith("." + blocked)
+        for blocked in BLOCKED_DISCOVERY_DOMAINS
+    )
+
+
 def latest_reviews():
     latest_ids = []
     seen = set()
@@ -60,7 +94,7 @@ def process_positive_discovery(limit=20):
     for event in events:
         links = event.news_item.occurrences.values_list("outbound_links__url", "outbound_links__domain").filter(outbound_links__is_external=True)
         for url, domain in links:
-            if not domain or Source.objects.filter(domain=domain).exists():
+            if not domain or is_blocked_discovery_domain(domain) or Source.objects.filter(domain=domain).exists():
                 continue
             probe, created = DiscoveryDomain.objects.get_or_create(review_event=event, domain=domain, defaults={"url": url})
             if created:

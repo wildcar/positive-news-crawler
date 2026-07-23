@@ -2,6 +2,12 @@
 
 Newest first. Each entry is at most five lines using the format defined in `AGENTS.md`.
 
+## 2026-07-23 · Discovery blocklist for social/stores
+- What: Added `BLOCKED_DISCOVERY_DOMAINS` + `is_blocked_discovery_domain`; `process_positive_discovery` now skips social networks, messengers, video, app stores, and link shorteners. +2 tests (49 total).
+- Why: Auto-discovery kept creating dead probation sources (vk, ok, t.me, apps.apple.com, rustore, …) from share/app links in positive articles.
+- Files: collector/services/maintenance.py, tests/test_maintenance.py, AGENTS/SPEC.md
+- Next: Deploy; prod cleanup of existing blocked probation sources done separately.
+
 ## 2026-07-23 · Two constructive-journalism sources added
 - What: Added Fix the News (`fixthenews.com/feed/`) and YES! Magazine (`yesmagazine.org/feed`) as active RSS sources on prod (verified 200/RSS/fresh/robots/same-domain links).
 - Why: Operator request to add reputable constructive/solutions-journalism outlets.

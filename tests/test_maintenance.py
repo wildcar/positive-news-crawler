@@ -5,9 +5,37 @@ import pytest
 from django.test import override_settings
 from django.utils import timezone
 
-from collector.models import NewsTranslation, OperatorEvent, ReviewEvent, Source
+from collector.models import DiscoveryDomain, NewsTranslation, OperatorEvent, ReviewEvent, Source
 from collector.services.ingest import ingest_article
-from collector.services.maintenance import create_backup, evaluate_sources, purge_old_content, purge_rejected_content
+from collector.services.maintenance import (
+    create_backup,
+    evaluate_sources,
+    is_blocked_discovery_domain,
+    process_positive_discovery,
+    purge_old_content,
+    purge_rejected_content,
+)
+
+
+def test_discovery_blocklist_matches_domains_and_subdomains():
+    for blocked in ["vk.com", "invite.viber.com", "t.me", "apps.apple.com",
+                    "www.rustore.ru", "youtu.be", "sub.ok.ru"]:
+        assert is_blocked_discovery_domain(blocked), blocked
+    for allowed in ["apple.com", "goodnewsnetwork.org", "ria.ru", "bbc.com", ""]:
+        assert not is_blocked_discovery_domain(allowed), allowed
+
+
+@pytest.mark.django_db
+def test_positive_discovery_skips_blocked_domains():
+    source = Source.objects.create(name="Src", base_url="https://src.example/", domain="src.example")
+    item, _, _ = ingest_article(
+        source=source, url="https://src.example/a", title="Great story",
+        body=("Body text here. " * 30), links=["https://vk.com/share", "https://t.me/x"],
+    )
+    ReviewEvent.objects.create(news_item=item, decision="positive", selector_name="news-evaluator", idempotency_key="k1")
+    process_positive_discovery()
+    assert not DiscoveryDomain.objects.filter(domain__in=["vk.com", "t.me"]).exists()
+    assert not Source.objects.filter(domain__in=["vk.com", "t.me"]).exists()
 
 
 @pytest.mark.django_db
